@@ -8,7 +8,15 @@
 """
 Description: Move Joint
 """
-
+import sys
+import copy
+import rospy
+import moveit_commander
+import moveit_msgs.msg
+import geometry_msgs.msg
+from math import pi
+from std_msgs.msg import String
+from moveit_commander.conversions import pose_to_list
 import os
 import sys
 import time
@@ -154,13 +162,13 @@ class MyViz( QWidget ):
         #self.switchToView( "Top View" );
         
         speed = 50
-        arm.set_servo_angle(angle=[0, 0, 0, 0, -90, 90], speed=speed, wait=True)
-        print(arm.get_servo_angle(), arm.get_servo_angle(is_radian=True))
+       # arm.set_servo_angle(angle=[0, 0, 0, 0, -90, 90], speed=speed, wait=True)
+       # print(arm.get_servo_angle(), arm.get_servo_angle(is_radian=True))
         
     def onSideButtonClick( self ):
         speed = 5
-        arm.set_servo_angle(angle=[0, 0, 0, 0, -90, -90], speed=speed, wait=False)
-        print(arm.get_servo_angle(), arm.get_servo_angle(is_radian=True))
+      #  arm.set_servo_angle(angle=[0, 0, 0, 0, -90, -90], speed=speed, wait=False)
+      #  print(arm.get_servo_angle(), arm.get_servo_angle(is_radian=True))
         
     def onMarkerButtonClick( self ):
         # Cube / Cuboid:
@@ -214,16 +222,42 @@ else:
             
             
 if __name__ == '__main__':
-    app = QApplication( sys.argv )
+   # app = QApplication( sys.argv )
 
-    myviz = MyViz()
-    myviz.resize( 1000, 1000 )
-    myviz.show()
+   # myviz = MyViz()
+   # myviz.resize( 1000, 1000 )
+   # myviz.show()
     
-    arm = XArmAPI(ip)
-    arm.motion_enable(enable=True)
-    arm.set_mode(0)
-    arm.set_state(state=0)
-    
-    
-    app.exec_()
+    moveit_commander.roscpp_initialize(sys.argv)
+    rospy.init_node('move_group_python_interface_tutorial',
+                anonymous=True)
+    robot = moveit_commander.RobotCommander()
+    scene = moveit_commander.PlanningSceneInterface()
+    group_name = "panda_arm"
+    group = moveit_commander.MoveGroupCommander(group_name)
+    display_trajectory_publisher = rospy.Publisher('/move_group/display_planned_path',
+                                                moveit_msgs.msg.DisplayTrajectory,
+                                                queue_size=20)
+    # We can get the name of the reference frame for this robot:
+    planning_frame = group.get_planning_frame()
+    print ("============ Reference frame: %s" % planning_frame)
+
+    # We can also print the name of the end-effector link for this group:
+    eef_link = group.get_end_effector_link()
+    print ("============ End effector: %s" % eef_link)
+
+    # We can get a list of all the groups in the robot:
+    group_names = robot.get_group_names()
+    print ("============ Robot Groups:", robot.get_group_names())
+
+    # Sometimes for debugging it is useful to print the entire state of the
+    # robot:
+    print ("============ Printing robot state")
+    print (robot.get_current_state())
+    print ("")
+   # arm = XArmAPI(ip)
+   # arm.motion_enable(enable=True)
+   # arm.set_mode(0)
+   # arm.set_state(state=0)
+   sys.exit(moveit_commander.exec_())
+   
