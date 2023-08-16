@@ -1,0 +1,3 @@
+#!/bin/bash
+cp urdf/*.* ../xarm_ws/src/xarm_ros/xarm_description/urdf/xarm6/.
+cp srdf/*.* ../xarm_ws/src/xarm_ros/xarm_description/srdf/.
