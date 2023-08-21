@@ -23,6 +23,9 @@ import time
 import math
 from geometry_msgs.msg import Pose, Point, Quaternion, Vector3, Polygon
 from tf import transformations # rotation_matrix(), concatenate_matrices()
+
+import moveit_function
+
 import rospy
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
 
@@ -31,9 +34,6 @@ import rviz_tools
 ## First we start with the standard ros Python import line:
 import roslib
 roslib.load_manifest('rviz_python_tutorial')
-
-## Then load sys to get sys.argv.
-import sys
 
 ## Next import all the Qt bindings into the current namespace, for
 ## convenience.  This uses the "python_qt_binding" package which hides
@@ -50,7 +50,7 @@ except ImportError:
 ## Finally import the RViz bindings themselves.
 from rviz import bindings as rviz
 
-rospy.init_node('marker', anonymous=True, log_level=rospy.INFO, disable_signals=False)
+##rospy.init_node('marker', anonymous=True, log_level=rospy.INFO, disable_signals=False)
 ## The MyViz class is the main container widget.
 class MyViz( QWidget ):
 
@@ -159,17 +159,13 @@ class MyViz( QWidget ):
 
     ## The view buttons just call switchToView() with the name of a saved view.
     def onTopButtonClick( self ):
-        #self.switchToView( "Top View" );
-        
-        speed = 50
-       # arm.set_servo_angle(angle=[0, 0, 0, 0, -90, 90], speed=speed, wait=True)
-       # print(arm.get_servo_angle(), arm.get_servo_angle(is_radian=True))
+        print( " tutorial.go_to_joint_state1")
+        tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,-3.14/2.0,1)
         
     def onSideButtonClick( self ):
-        speed = 5
-      #  arm.set_servo_angle(angle=[0, 0, 0, 0, -90, -90], speed=speed, wait=False)
-      #  print(arm.get_servo_angle(), arm.get_servo_angle(is_radian=True))
-        
+        print( " tutorial.go_to_joint_state2")
+        tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,3.14/2.0,1)
+
     def onMarkerButtonClick( self ):
         # Cube / Cuboid:
         # Publish a cuboid using a numpy transform matrix
@@ -222,42 +218,13 @@ else:
             
             
 if __name__ == '__main__':
-   # app = QApplication( sys.argv )
+    app = QApplication( sys.argv )
 
-   # myviz = MyViz()
-   # myviz.resize( 1000, 1000 )
-   # myviz.show()
+    myviz = MyViz()
+    myviz.resize( 1000, 1000 )
+    myviz.show()
+
+    tutorial = moveit_function.MoveGroupPythonIntefaceTutorial()
     
-    moveit_commander.roscpp_initialize(sys.argv)
-    rospy.init_node('move_group_python_interface_tutorial',
-                anonymous=True)
-    robot = moveit_commander.RobotCommander()
-    scene = moveit_commander.PlanningSceneInterface()
-    group_name = "panda_arm"
-    group = moveit_commander.MoveGroupCommander(group_name)
-    display_trajectory_publisher = rospy.Publisher('/move_group/display_planned_path',
-                                                moveit_msgs.msg.DisplayTrajectory,
-                                                queue_size=20)
-    # We can get the name of the reference frame for this robot:
-    planning_frame = group.get_planning_frame()
-    print ("============ Reference frame: %s" % planning_frame)
-
-    # We can also print the name of the end-effector link for this group:
-    eef_link = group.get_end_effector_link()
-    print ("============ End effector: %s" % eef_link)
-
-    # We can get a list of all the groups in the robot:
-    group_names = robot.get_group_names()
-    print ("============ Robot Groups:", robot.get_group_names())
-
-    # Sometimes for debugging it is useful to print the entire state of the
-    # robot:
-    print ("============ Printing robot state")
-    print (robot.get_current_state())
-    print ("")
-   # arm = XArmAPI(ip)
-   # arm.motion_enable(enable=True)
-   # arm.set_mode(0)
-   # arm.set_state(state=0)
-   sys.exit(moveit_commander.exec_())
-   
+       
+    app.exec_()

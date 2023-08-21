@@ -202,7 +202,7 @@ class MoveGroupPythonIntefaceTutorial(object):
     joint_goal[2] = 0
     joint_goal[3] = 0
     joint_goal[4] = -pi/2
-    joint_goal[5] = pi/2
+    joint_goal[5] = pi/6
 
 
     # The go command can be called with joint values, poses, or without any
@@ -239,7 +239,7 @@ class MoveGroupPythonIntefaceTutorial(object):
     joint_goal[2] = 0
     joint_goal[3] = 0
     joint_goal[4] = -pi/2
-    joint_goal[5] = -pi/2
+    joint_goal[5] = -pi/6
 
 
     # The go command can be called with joint values, poses, or without any

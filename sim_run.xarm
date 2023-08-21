@@ -1,8 +1,6 @@
 #!/bin/bash
-roscore |
-roslaunch xarm_gazebo xarm6_beside_table.launch |
-roslaunch xarm6_moveit_config xarm6_moveit_gazebo.launch |
-roslaunch laser_assembler.launch |
+
+roslaunch xarm6_sim.launch |
 ./laser_assembler_service_caller
 
 
