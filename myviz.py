@@ -50,6 +50,8 @@ except ImportError:
 ## Finally import the RViz bindings themselves.
 from rviz import bindings as rviz
 
+
+tutorial = moveit_function.MoveGroupPythonIntefaceTutorial()
 ##rospy.init_node('marker', anonymous=True, log_level=rospy.INFO, disable_signals=False)
 ## The MyViz class is the main container widget.
 class MyViz( QWidget ):
@@ -144,6 +146,9 @@ class MyViz( QWidget ):
         
         self.setLayout( layout )
 
+        
+
+
     ## Handle GUI events
     ## ^^^^^^^^^^^^^^^^^
     ##
@@ -224,7 +229,6 @@ if __name__ == '__main__':
     myviz.resize( 1000, 1000 )
     myviz.show()
 
-    tutorial = moveit_function.MoveGroupPythonIntefaceTutorial()
     
        
     app.exec_()

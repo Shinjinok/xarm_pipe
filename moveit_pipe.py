@@ -28,9 +28,9 @@ if __name__ == "__main__":
         while i <= 2:
             # tutorial.go_to_joint_state1()
             print( " tutorial.go_to_joint_state1")
-            tutorial.go_to_joint_state1(0.0,0.0,0.0,0.0,-3.14/2.0,-3.14/2.0,1)
+            tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,-3.14/6.0,1)
             print( " tutorial.go_to_joint_state2")
-            tutorial.go_to_joint_state1(0.0,0.0,0.0,0.0,-3.14/2.0,3.14/2.0,1)
+            tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,3.14/6.0,1)
             i = i + 1
             print(i)
             
