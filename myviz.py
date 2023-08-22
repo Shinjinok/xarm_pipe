@@ -25,7 +25,7 @@ from geometry_msgs.msg import Pose, Point, Quaternion, Vector3, Polygon
 from tf import transformations # rotation_matrix(), concatenate_matrices()
 
 import moveit_function
-
+import test3dplot
 import rospy
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
 
@@ -218,17 +218,12 @@ else:
             print('input error, exit')
             sys.exit(1)
             
-            
-            
-            
+        
             
 if __name__ == '__main__':
     app = QApplication( sys.argv )
 
     myviz = MyViz()
-    myviz.resize( 1000, 1000 )
+    myviz.resize( 1000, 500 )
     myviz.show()
-
-    
-       
     app.exec_()
