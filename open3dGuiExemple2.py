@@ -1,9 +1,10 @@
 import os.path
 import sys
-
+import numpy as np
 import open3d as o3d
 import open3d.visualization.gui as gui
 import open3d.visualization.rendering as rendering
+
 import time
 import rospy
 from sensor_msgs.msg import PointCloud2
@@ -11,6 +12,7 @@ import sensor_msgs.point_cloud2 as pc2
 import pcl #sudo apt install python3-pcl
 import ros_numpy #sudo apt-get install ros-noetic-ros-numpy
 
+import pyransac3d as pyrsc #pip3 install pyransac3d
 
 print("Project")
 print("python version", sys.version)
@@ -21,9 +23,10 @@ class WindowApp:
     def __init__(self):
 
         rospy.init_node("move_group_python_interface_tutorial", anonymous=True)
-        rospy.Subscriber('/cloud2', PointCloud2, self.callback) 
+        rospy.Subscriber('/cloud2', PointCloud2, self.callback)
+        self.point_cloud = o3d.geometry.PointCloud()
 
-        self.window = gui.Application.instance.create_window("Spinnables", 1400, 900)
+        self.window = gui.Application.instance.create_window("xARM6", 1400, 900)
         w = self.window
 
         # member variables
@@ -54,10 +57,16 @@ class WindowApp:
                                     500, w.content_rect.height)
         # File-chooser widget
         self._fileedit = gui.TextEdit()
-        filedlgbutton = gui.Button("...")
+        filedlgbutton = gui.Button("scan")
         filedlgbutton.horizontal_padding_em = 0.5
         filedlgbutton.vertical_padding_em = 0
         filedlgbutton.set_on_clicked(self._on_filedlg_button)
+
+
+        scanbutton = gui.Button("scan")
+        scanbutton.horizontal_padding_em = 1
+        scanbutton.vertical_padding_em = 1
+        scanbutton.set_on_clicked(self._on_scan_button)
 
         fileedit_layout = gui.Horiz()
         fileedit_layout.add_child(gui.Label("Model file"))
@@ -71,17 +80,44 @@ class WindowApp:
         w.add_child(self._widget3d)
 
     def _on_mouse_widget3d(self, event):
-        print(event.type)
+        #print(event.type)
         return gui.Widget.EventCallbackResult.IGNORED
 
     def _on_filedlg_button(self):
-        filedlg = gui.FileDialog(gui.FileDialog.OPEN, "Select file",
-                                 self.window.theme)
-        filedlg.add_filter(".obj .ply .stl", "Triangle mesh (.obj, .ply, .stl)")
-        filedlg.add_filter("", "All files")
-        filedlg.set_on_cancel(self._on_filedlg_cancel)
-        filedlg.set_on_done(self._on_filedlg_done)
-        self.window.show_dialog(filedlg)
+      #  filedlg = gui.FileDialog(gui.FileDialog.OPEN, "Select file", self.window.theme)
+      #  filedlg.add_filter(".obj .ply .stl", "Triangle mesh (.obj, .ply, .stl)")
+      #  filedlg.add_filter("", "All files")
+      #  filedlg.set_on_cancel(self._on_filedlg_cancel)
+      #  filedlg.set_on_done(self._on_filedlg_done)
+      #  self.window.show_dialog(filedlg)
+        if self._widget3d.scene.has_geometry :
+            self._widget3d.scene.remove_geometry('cloud2')
+        self._widget3d.scene.add_geometry('cloud2', self.point_cloud, self.material)
+
+        o3d.io.write_point_cloud("point_pipe.pcd", self.point_cloud)
+
+       # cil = pyrsc.Cylinder()
+       # points = np.asarray(self.point_cloud.points)
+       
+       # center, normal, radius, inliers = cil.fit(points, thresh=0.02)
+       # print("center: " + str(center))
+       # print("radius: " + str(radius))
+       # print("vecC: " + str(normal))
+       # R = pyrsc.get_rotationMatrix_from_vectors([0, 0, 1], normal)
+
+       # plane = self.point_cloud.select_by_index(inliers).paint_uniform_color([1, 0, 0])
+      #  not_plane = self.point_cloud.select_by_index(inliers, invert=True)
+      #  mesh = o3d.geometry.TriangleMesh.create_coordinate_frame(origin=[0, 0, 0], size=0.2)
+      #  cen = o3d.geometry.TriangleMesh.create_coordinate_frame(origin=center, size=0.5)
+      #  mesh_rot = copy.deepcopy(mesh).rotate(R, center=[0, 0, 0])
+
+      #  mesh_cylinder = o3d.geometry.TriangleMesh.create_cylinder(radius=radius, height=0.5)
+      #  mesh_cylinder.compute_vertex_normals()
+      #  mesh_cylinder.paint_uniform_color([0.1, 0.9, 0.1])
+       # mesh_cylinder = mesh_cylinder.rotate(R, center=[0, 0, 0])
+       # mesh_cylinder = mesh_cylinder.translate((center[0], center[1], center[2]))
+ 
+       # self._widget3d.scene.add_geometry('mesh', mesh_cylinder, self.material)
 
     def _on_filedlg_cancel(self):
         self.window.close_dialog()
@@ -91,12 +127,15 @@ class WindowApp:
         self.model_dir = os.path.normpath(path)
         # load model
         self.window.close_dialog()
-
+    
+    def _on_scan_button(self):
+        self._widget3d.scene.add_geometry('cloud2', self.point_cloud, self.material)
+    
     def callback(self, ros_cloud):
-        self.point_cloud = o3d.geometry.PointCloud()
-        self.point_cloud.points = o3d.utility.Vector3dVector(ros_numpy.point_cloud2.pointcloud2_to_xyz_array(self.point_cloud))
-        self._widget3d.scene.add_geometry('',self.point_cloud,self.material)
-        #_widget3d.scene.add_geometry('mesh', mesh, material)
+        self.point_cloud.points = o3d.utility.Vector3dVector(ros_numpy.point_cloud2
+                                        .pointcloud2_to_xyz_array(ros_cloud))
+
+
 def main():
     
     gui.Application.instance.initialize()

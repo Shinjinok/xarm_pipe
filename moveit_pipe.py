@@ -1,4 +1,4 @@
-import moveit_function
+import moveit_function2
 import time
 import rospy
 from sensor_msgs.msg import PointCloud2
@@ -14,7 +14,7 @@ def callback(ros_cloud):
 
     for data in pc2.read_points(ros_cloud, skip_nans=True):
         points_list.append([data[0], data[1], data[2], data[3]])
-    print(len(points_list))
+   # print(len(points_list))
 
 
 if __name__ == "__main__":
@@ -23,14 +23,16 @@ if __name__ == "__main__":
     rospy.Subscriber('/cloud2', PointCloud2, callback)  
     
     try: 
-        tutorial = moveit_function.MoveGroupPythonIntefaceTutorial()
+        tutorial = moveit_function2.MoveGroupPythonInterfaceTutorial()
         i=0
-        while i <= 2:
+        while i < 100:
             # tutorial.go_to_joint_state1()
             print( " tutorial.go_to_joint_state1")
-            tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,-3.14/6.0,1)
+            ret=tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,-3.14/4.0,1)
+            print(ret)
             print( " tutorial.go_to_joint_state2")
-            tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,3.14/6.0,1)
+            ret = tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,3.14/4.0,1)
+            print(ret)
             i = i + 1
             print(i)
             

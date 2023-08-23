@@ -171,7 +171,7 @@ class MoveGroupPythonIntefaceTutorial(object):
 
     # The go command can be called with joint values, poses, or without any
     # parameters if you have already set the pose or joint target for the group
-    group.go(joint_goal, wait=False)
+    group.go(joint_goal, wait=True)
 
     # Calling ``stop()`` ensures that there is no residual movement
     group.stop()
