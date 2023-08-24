@@ -180,12 +180,13 @@ class MyViz( QWidget ):
         tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,-3.14/2.0,1)
         
     def onSideButtonClick( self ):
-        print( " tutorial.go_to_joint_state2")
-        tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,3.14/2.0,1)
+        o3d.io.write_point_cloud("point_pipe.pcd", self.point_cloud)
+        #print( " tutorial.go_to_joint_state2")
+        #tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,3.14/2.0,1)
 
     def onMarkerButtonClick( self ):
         pcd2 = fp.get_flattened_pcds2(source=self.point_cloud,A=0,B=1,C=0,D=0,x0=0,y0=1000,z0=0)
-        center, normal, radius, inliers = fp.get_cylinder(pcd2, thresh=0.1, maxIteration=100)
+        center, normal, radius, inliers = fp.get_cylinder(pcd2, thresh=0.1, maxIteration=10)
         
         print("center: " + str(center))
         print("radius: " + str(radius))

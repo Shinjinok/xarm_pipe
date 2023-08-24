@@ -28,10 +28,10 @@ if __name__ == "__main__":
         while i < 10000:
             # tutorial.go_to_joint_state1()
             print( " tutorial.go_to_joint_state1")
-            ret=tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,-3.14/4.0,1)
+            ret=tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,-3.14/6.0,1)
             print(ret)
             print( " tutorial.go_to_joint_state2")
-            ret = tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,3.14/4.0,1)
+            ret = tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,3.14/6.0,1)
             print(ret)
             i = i + 1
             print(i)

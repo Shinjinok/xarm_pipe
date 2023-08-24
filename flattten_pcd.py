@@ -44,18 +44,18 @@ def get_clylinder_pos(center, normal):
     r = pyrsc.get_rotationMatrix_from_vectors([0, 0, 1], normal)
     R = np.identity(4)
     R[0:3,0:3] = r
-    
-    
-
     print("R :",np.array(R))
     print(len(R))
-
     qt = transformations.quaternion_from_matrix(R)
     print("qt :",qt)
     P = Pose(Point(center[0],center[1],center[2]),Quaternion(qt[0],qt[1],qt[2],qt[3]))
     return P
-
-#R = pyrsc.get_rotationMatrix_from_vectors([0, 0, 1], normal)
+def get_plane(pcd2,thresh=0.1,maxIteration=1000):
+    cil = pyrsc.Plane()
+    points = np.asarray(pcd2.points)
+    eq, inliers = cil.fit(points, thresh, maxIteration)
+    return eq, inliers
+#R = pyrsc.get_otationMatrix_from_vectors([0, 0, 1], normal)
 
 #plane = pcd2.select_by_index(inliers).paint_uniform_color([1, 0, 0])
 # obb = plane.get_oriented_bounding_box()
