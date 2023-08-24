@@ -35,6 +35,12 @@ import rviz_tools
 import roslib
 roslib.load_manifest('rviz_python_tutorial')
 
+import flattten_pcd as fp
+import open3d as o3d
+import ros_numpy #sudo apt-get install ros-noetic-ros-numpy
+from sensor_msgs.msg import PointCloud2
+from visualization_msgs.msg import Marker
+import numpy as np
 ## Next import all the Qt bindings into the current namespace, for
 ## convenience.  This uses the "python_qt_binding" package which hides
 ## differences between PyQt and PySide, and works if at least one of
@@ -146,6 +152,12 @@ class MyViz( QWidget ):
         
         self.setLayout( layout )
 
+        rospy.init_node("move_group_python_interface_tutorial", anonymous=True)
+        rospy.Subscriber('/cloud2', PointCloud2, self.callback)
+        self.point_cloud = o3d.geometry.PointCloud()
+
+        self.markers = rviz_tools.RvizMarkers('world', 'visualization_marker')
+
         
 
 
@@ -172,13 +184,23 @@ class MyViz( QWidget ):
         tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,3.14/2.0,1)
 
     def onMarkerButtonClick( self ):
-        # Cube / Cuboid:
-        # Publish a cuboid using a numpy transform matrix
-        markers = rviz_tools.RvizMarkers ('world', 'visualization_marker')
-        T = transformations.translation_matrix((0.6,2.2,0))
-        scale = Vector3(1.5,5.2,0.2)
-        markers.publishCube(T, 'red', scale, 5.0) # pose, color, scale, lifetime
-            
+        pcd2 = fp.get_flattened_pcds2(source=self.point_cloud,A=0,B=1,C=0,D=0,x0=0,y0=1000,z0=0)
+        center, normal, radius, inliers = fp.get_cylinder(pcd2, thresh=0.1, maxIteration=100)
+        
+        print("center: " + str(center))
+        print("radius: " + str(radius))
+        print("vecC: " + str(normal))
+        print("inliers: ", inliers)
+        # Cylinder:
+
+        # Publish a cylinder using a numpy transform matrix
+        #T = transformations.translation_matrix(normal)
+        #self.markers.publishCylinder(T, 'green', 1.0, radius, 5.0) # pose, color, height, radius, lifetime
+
+        # Publish a cylinder using a ROS Pose
+        P=fp.get_clylinder_pos(center,normal)
+        self.markers.publishCylinder(P, 'blue', 0.2, radius, 5.0) # pose, color, height, radius, lifetime    
+           
     ## switchToView() works by looping over the views saved in the
     ## ViewManager and looking for one with a matching name.
     ##
@@ -192,7 +214,9 @@ class MyViz( QWidget ):
                 view_man.setCurrentFrom( view_man.getViewAt( i ))
                 return
         print( "Did not find view named %s." % view_name )
-
+    def callback(self, ros_cloud):
+        self.point_cloud.points = o3d.utility.Vector3dVector(ros_numpy.point_cloud2
+                                        .pointcloud2_to_xyz_array(ros_cloud))
 ## Start the Application
 ## ^^^^^^^^^^^^^^^^^^^^^
 ##

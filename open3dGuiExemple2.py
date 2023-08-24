@@ -13,6 +13,7 @@ import pcl #sudo apt install python3-pcl
 import ros_numpy #sudo apt-get install ros-noetic-ros-numpy
 
 import pyransac3d as pyrsc #pip3 install pyransac3d
+import flattten_pcd as fp
 
 print("Project")
 print("python version", sys.version)
@@ -90,12 +91,21 @@ class WindowApp:
       #  filedlg.set_on_cancel(self._on_filedlg_cancel)
       #  filedlg.set_on_done(self._on_filedlg_done)
       #  self.window.show_dialog(filedlg)
-        if self._widget3d.scene.has_geometry :
+        if self._widget3d.scene.has_geometry('cloud2') :
             self._widget3d.scene.remove_geometry('cloud2')
         self._widget3d.scene.add_geometry('cloud2', self.point_cloud, self.material)
 
-        o3d.io.write_point_cloud("point_pipe.pcd", self.point_cloud)
-
+        #o3d.io.write_point_cloud("point_pipe.pcd", self.point_cloud)
+        pcd2 = fp.get_flattened_pcds2(source=self.point_cloud,A=0,B=1,C=0,D=0,x0=0,y0=1000,z0=0)
+        center, normal, radius, inliers = fp.get_cylinder(pcd2, thresh=0.1, maxIteration=1)
+        mesh_cylinder = fp.get_clylinder_mesh(pcd2,center, normal, radius, inliers)
+        if self._widget3d.scene.has_geometry('cylinder') :
+            self._widget3d.scene.remove_geometry('cylinder')
+        self._widget3d.scene.add_geometry('cylinder', mesh_cylinder, self.material)
+        print("center: " + str(center))
+        print("radius: " + str(radius))
+        print("vecC: " + str(normal))
+        print("inliers: ", inliers)
        # cil = pyrsc.Cylinder()
        # points = np.asarray(self.point_cloud.points)
        

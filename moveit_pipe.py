@@ -25,7 +25,7 @@ if __name__ == "__main__":
     try: 
         tutorial = moveit_function2.MoveGroupPythonInterfaceTutorial()
         i=0
-        while i < 100:
+        while i < 10000:
             # tutorial.go_to_joint_state1()
             print( " tutorial.go_to_joint_state1")
             ret=tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,-3.14/4.0,1)
