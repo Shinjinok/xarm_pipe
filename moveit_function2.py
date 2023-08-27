@@ -209,7 +209,7 @@ class MoveGroupPythonInterfaceTutorial(object):
         current_joints = self.move_group.get_current_joint_values()
         return all_close(joint_goal, current_joints, 0.01)
 
-    def go_to_pose_goal(self):
+    def go_to_pose_goal(self,pos,qt):
         # Copy class variables to local variables to make the web tutorials more clear.
         # In practice, you should use the class variables directly unless you have a good
         # reason not to.
@@ -222,10 +222,14 @@ class MoveGroupPythonInterfaceTutorial(object):
         ## We can plan a motion for this group to a desired pose for the
         ## end-effector:
         pose_goal = geometry_msgs.msg.Pose()
-        pose_goal.orientation.w = 1.0
-        pose_goal.position.x = 0.4
-        pose_goal.position.y = 0.1
-        pose_goal.position.z = 0.4
+        pose_goal.orientation.x = qt[0]
+        pose_goal.orientation.y = qt[1]
+        pose_goal.orientation.z = qt[2]
+        pose_goal.orientation.w = qt[3]
+        pose_goal.position.x = pos[0]
+        pose_goal.position.y = pos[1]
+        pose_goal.position.z = pos[2]
+        move_group.set_max_velocity_scaling_factor(1.0)	
 
         move_group.set_pose_target(pose_goal)
 
@@ -246,7 +250,7 @@ class MoveGroupPythonInterfaceTutorial(object):
         current_pose = self.move_group.get_current_pose().pose
         return all_close(pose_goal, current_pose, 0.01)
 
-    def plan_cartesian_path(self, scale=1):
+    def plan_cartesian_path(self, x,y,z,scale):
         # Copy class variables to local variables to make the web tutorials more clear.
         # In practice, you should use the class variables directly unless you have a good
         # reason not to.
@@ -263,15 +267,16 @@ class MoveGroupPythonInterfaceTutorial(object):
         waypoints = []
 
         wpose = move_group.get_current_pose().pose
-        wpose.position.z -= scale * 0.1  # First move up (z)
-        wpose.position.y += scale * 0.2  # and sideways (y)
+        wpose.position.x = x  # First move up (z)
+        wpose.position.y = y  # and sideways (y)
+        wpose.position.z = z  # and sideways (y)
         waypoints.append(copy.deepcopy(wpose))
 
-        wpose.position.x += scale * 0.1  # Second move forward/backwards in (x)
-        waypoints.append(copy.deepcopy(wpose))
+        #wpose.position.x += scale * 0.1  # Second move forward/backwards in (x)
+        #waypoints.append(copy.deepcopy(wpose))
 
-        wpose.position.y -= scale * 0.1  # Third move sideways (y)
-        waypoints.append(copy.deepcopy(wpose))
+        #wpose.position.y -= scale * 0.1  # Third move sideways (y)
+        #waypoints.append(copy.deepcopy(wpose))
 
         # We want the Cartesian path to be interpolated at a resolution of 1 cm
         # which is why we will specify 0.01 as the eef_step in Cartesian

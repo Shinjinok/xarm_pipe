@@ -136,17 +136,31 @@ class MyViz( QWidget ):
         
         h_layout = QHBoxLayout()
         
-        top_button = QPushButton( "Start Scan" )
-        top_button.clicked.connect( self.onTopButtonClick )
-        h_layout.addWidget( top_button )
+        home_button = QPushButton( "Home pose" )
+        home_button.clicked.connect( self.onHomeButtonClick )
+        h_layout.addWidget( home_button )
         
-        side_button = QPushButton( "Stop Scan" )
-        side_button.clicked.connect( self.onSideButtonClick )
-        h_layout.addWidget( side_button )
+        scanH_button = QPushButton( "Scan H" )
+        scanH_button.clicked.connect( self.onScanHButtonClick )
+        h_layout.addWidget( scanH_button )
+
+        scanV_button = QPushButton( "Scan V" )
+        scanV_button.clicked.connect( self.onScanVButtonClick )
+        h_layout.addWidget( scanV_button )
+
+        save_button = QPushButton( "Save PCD" )
+        save_button.clicked.connect( self.onSaveButtonClick )
+        h_layout.addWidget( save_button )
+
+        go_button = QPushButton( "Go Target" )
+        go_button.clicked.connect( self.onGoButtonClick )
+        h_layout.addWidget( go_button )
         
         marker_button = QPushButton( "marker" )
         marker_button.clicked.connect( self.onMarkerButtonClick )
         h_layout.addWidget( marker_button )
+
+        
         
         layout.addLayout( h_layout )
         
@@ -175,18 +189,30 @@ class MyViz( QWidget ):
             self.grid_display.subProp( "Line Style" ).subProp( "Line Width" ).setValue( new_value / 1000.0 )
 
     ## The view buttons just call switchToView() with the name of a saved view.
-    def onTopButtonClick( self ):
+    def onHomeButtonClick( self ):
+        print( " tutorial.go_to_joint_state1")
+        tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,0,1)
+        
+    def onScanHButtonClick( self ):
         print( " tutorial.go_to_joint_state1")
         tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,-3.14/2.0,1)
-        
-    def onSideButtonClick( self ):
+        print( " tutorial.go_to_joint_state2")
+        tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,3.14/2.0,1)
+    def onScanVButtonClick( self ):
+        print( " tutorial.go_to_joint_state1")
+        tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,-3.14/2.0,1)
+        print( " tutorial.go_to_joint_state2")
+        tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,3.14/2.0,1)
+    def onSaveButtonClick( self ):
         o3d.io.write_point_cloud("point_pipe.pcd", self.point_cloud)
-        #print( " tutorial.go_to_joint_state2")
-        #tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,3.14/2.0,1)
+
+    def onGoButtonClick( self ):    
+        o3d.io.write_point_cloud("point_pipe.pcd", self.point_cloud)
+
 
     def onMarkerButtonClick( self ):
         pcd2 = fp.get_flattened_pcds2(source=self.point_cloud,A=0,B=1,C=0,D=0,x0=0,y0=1000,z0=0)
-        center, normal, radius, inliers = fp.get_cylinder(pcd2, thresh=0.1, maxIteration=10)
+        center, normal, radius, inliers = fp.get_cylinder(pcd2, thresh=0.0001, maxIteration=100000)
         
         print("center: " + str(center))
         print("radius: " + str(radius))
@@ -215,6 +241,7 @@ class MyViz( QWidget ):
                 view_man.setCurrentFrom( view_man.getViewAt( i ))
                 return
         print( "Did not find view named %s." % view_name )
+
     def callback(self, ros_cloud):
         self.point_cloud.points = o3d.utility.Vector3dVector(ros_numpy.point_cloud2
                                         .pointcloud2_to_xyz_array(ros_cloud))

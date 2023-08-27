@@ -31,7 +31,7 @@ def get_cylinder(pcd2,thresh=0.1,maxIteration=1000):
     center, normal, radius, inliers = cil.fit(points, thresh, maxIteration)
     return center, normal, radius, inliers
 
-def get_clylinder_mesh(pcd2,center, normal, radius, inliers):
+def get_clylinder_mesh(center, normal, radius):
 
     R = pyrsc.get_rotationMatrix_from_vectors([0, 0, 1], normal)
     mesh_cylinder = o3d.geometry.TriangleMesh.create_cylinder(radius=radius, height=0.5)
@@ -40,6 +40,7 @@ def get_clylinder_mesh(pcd2,center, normal, radius, inliers):
     mesh_cylinder = mesh_cylinder.rotate(R, center=[0, 0, 0])
     mesh_cylinder = mesh_cylinder.translate((center[0], center[1], center[2]))
     return mesh_cylinder
+
 def get_clylinder_pos(center, normal):
     r = pyrsc.get_rotationMatrix_from_vectors([0, 0, 1], normal)
     R = np.identity(4)
@@ -50,6 +51,7 @@ def get_clylinder_pos(center, normal):
     print("qt :",qt)
     P = Pose(Point(center[0],center[1],center[2]),Quaternion(qt[0],qt[1],qt[2],qt[3]))
     return P
+
 def get_plane(pcd2,thresh=0.1,maxIteration=1000):
     cil = pyrsc.Plane()
     points = np.asarray(pcd2.points)
