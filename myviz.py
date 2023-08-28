@@ -24,7 +24,7 @@ import math
 from geometry_msgs.msg import Pose, Point, Quaternion, Vector3, Polygon
 from tf import transformations # rotation_matrix(), concatenate_matrices()
 
-import moveit_function
+import moveit_function2
 import test3dplot
 import rospy
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
@@ -57,7 +57,7 @@ except ImportError:
 from rviz import bindings as rviz
 
 
-tutorial = moveit_function.MoveGroupPythonIntefaceTutorial()
+tutorial = moveit_function2.MoveGroupPythonInterfaceTutorial()
 ##rospy.init_node('marker', anonymous=True, log_level=rospy.INFO, disable_signals=False)
 ## The MyViz class is the main container widget.
 class MyViz( QWidget ):
@@ -190,43 +190,45 @@ class MyViz( QWidget ):
 
     ## The view buttons just call switchToView() with the name of a saved view.
     def onHomeButtonClick( self ):
-        print( " tutorial.go_to_joint_state1")
-        tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,0,1)
+        print( " Go to home position")
+        tutorial.go_to_joint_state(0,0,0,0,-3.14/2.0,0,1)
         
     def onScanHButtonClick( self ):
-        print( " tutorial.go_to_joint_state1")
-        tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,-3.14/2.0,1)
-        print( " tutorial.go_to_joint_state2")
-        tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,3.14/2.0,1)
+        print( " Go to start position")
+        #tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,-3.14/2.0,1)
+
+        tutorial.go_to_pose_goal(np.array([0.2, -0.3,0.2]),np.array([-3.14/2.0,0,0]),1)
+        print( " Horizental Scaning")
+        plan, fraction = tutorial.plan_cartesian_path(np.array([0.2, 0.3,0.2]),0.1)
+        tutorial.execute_plan(plan)
+        print( " Scaning Done")
+        #tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,3.14/2.0,0.05)
     def onScanVButtonClick( self ):
-        print( " tutorial.go_to_joint_state1")
-        tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,-3.14/2.0,1)
-        print( " tutorial.go_to_joint_state2")
-        tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,3.14/2.0,1)
+        print( " Go to start position")
+        #tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,-3.14/2.0,1)
+
+        tutorial.go_to_pose_goal(np.array([-0.2, 0.2,0.2]),np.array([0,0,0]),1)
+        print( " Vertical Scaning")
+        plan, fraction = tutorial.plan_cartesian_path(np.array([0.2, 0.2,0.2]),0.1)
+        tutorial.execute_plan(plan)
+        print( " Scaning Done")
+        #tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,3.14/2.0,0.05)
     def onSaveButtonClick( self ):
         o3d.io.write_point_cloud("point_pipe.pcd", self.point_cloud)
 
     def onGoButtonClick( self ):    
-        o3d.io.write_point_cloud("point_pipe.pcd", self.point_cloud)
-
+        print( " Go to start position")
+        tutorial.go_to_pose_goal(self.targepoint- np.array([0.3,0,0]),np.array([0,0,0.0]),1)
 
     def onMarkerButtonClick( self ):
-        pcd2 = fp.get_flattened_pcds2(source=self.point_cloud,A=0,B=1,C=0,D=0,x0=0,y0=1000,z0=0)
-        center, normal, radius, inliers = fp.get_cylinder(pcd2, thresh=0.0001, maxIteration=100000)
-        
-        print("center: " + str(center))
-        print("radius: " + str(radius))
-        print("vecC: " + str(normal))
-        print("inliers: ", inliers)
-        # Cylinder:
-
-        # Publish a cylinder using a numpy transform matrix
-        #T = transformations.translation_matrix(normal)
-        #self.markers.publishCylinder(T, 'green', 1.0, radius, 5.0) # pose, color, height, radius, lifetime
-
-        # Publish a cylinder using a ROS Pose
+        #pcd2 = fp.get_flattened_pcds2(source=self.point_cloud,A=0,B=1,C=0,D=0,x0=0,y0=1000,z0=0)
+        center, normal, radius = fp.get_cylinder(self.point_cloud, thresh=0.01, maxIteration=10000)
+        self.targepoint = center
         P=fp.get_clylinder_pos(center,normal)
-        self.markers.publishCylinder(P, 'blue', 0.2, radius, 5.0) # pose, color, height, radius, lifetime    
+
+        #publishCylinder(self, pose, color, height, radius, lifetime=None):
+        self.markers.publishCylinder(pose = P, color ='blue', height= 0.2,
+                                     radius = radius*2, lifetime=0) # pose, color, height, radius, lifetime    
            
     ## switchToView() works by looping over the views saved in the
     ## ViewManager and looking for one with a matching name.

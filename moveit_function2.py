@@ -51,6 +51,7 @@ import rospy
 import moveit_commander
 import moveit_msgs.msg
 import geometry_msgs.msg
+import numpy as np
 
 try:
     from math import pi, tau, dist, fabs, cos
@@ -172,6 +173,15 @@ class MoveGroupPythonInterfaceTutorial(object):
         self.eef_link = eef_link
         self.group_names = group_names
 
+    def euler_to_quaternion(self,roll,pitch,yaw):
+
+        qx = np.sin(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) - np.cos(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
+        qy = np.cos(roll/2) * np.sin(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.cos(pitch/2) * np.sin(yaw/2)
+        qz = np.cos(roll/2) * np.cos(pitch/2) * np.sin(yaw/2) - np.sin(roll/2) * np.sin(pitch/2) * np.cos(yaw/2)
+        qw = np.cos(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
+
+        return [qx, qy, qz, qw]
+    
     def go_to_joint_state(self,j1,j2,j3,j4,j5,j6,speed_factor):
         # Copy class variables to local variables to make the web tutorials more clear.
         # In practice, you should use the class variables directly unless you have a good
@@ -209,7 +219,7 @@ class MoveGroupPythonInterfaceTutorial(object):
         current_joints = self.move_group.get_current_joint_values()
         return all_close(joint_goal, current_joints, 0.01)
 
-    def go_to_pose_goal(self,pos,qt):
+    def go_to_pose_goal(self,pos,radian,speed_factor):
         # Copy class variables to local variables to make the web tutorials more clear.
         # In practice, you should use the class variables directly unless you have a good
         # reason not to.
@@ -222,6 +232,7 @@ class MoveGroupPythonInterfaceTutorial(object):
         ## We can plan a motion for this group to a desired pose for the
         ## end-effector:
         pose_goal = geometry_msgs.msg.Pose()
+        qt = self.euler_to_quaternion(radian[0],radian[1],radian[2])
         pose_goal.orientation.x = qt[0]
         pose_goal.orientation.y = qt[1]
         pose_goal.orientation.z = qt[2]
@@ -229,7 +240,7 @@ class MoveGroupPythonInterfaceTutorial(object):
         pose_goal.position.x = pos[0]
         pose_goal.position.y = pos[1]
         pose_goal.position.z = pos[2]
-        move_group.set_max_velocity_scaling_factor(1.0)	
+        move_group.set_max_velocity_scaling_factor(speed_factor)	
 
         move_group.set_pose_target(pose_goal)
 
@@ -250,12 +261,12 @@ class MoveGroupPythonInterfaceTutorial(object):
         current_pose = self.move_group.get_current_pose().pose
         return all_close(pose_goal, current_pose, 0.01)
 
-    def plan_cartesian_path(self, x,y,z,scale):
+    def plan_cartesian_path(self, pos,speed_factor):
         # Copy class variables to local variables to make the web tutorials more clear.
         # In practice, you should use the class variables directly unless you have a good
         # reason not to.
         move_group = self.move_group
-
+        move_group.set_max_velocity_scaling_factor(speed_factor)	
         ## BEGIN_SUB_TUTORIAL plan_cartesian_path
         ##
         ## Cartesian Paths
@@ -267,9 +278,10 @@ class MoveGroupPythonInterfaceTutorial(object):
         waypoints = []
 
         wpose = move_group.get_current_pose().pose
-        wpose.position.x = x  # First move up (z)
-        wpose.position.y = y  # and sideways (y)
-        wpose.position.z = z  # and sideways (y)
+        wpose.position.x = pos[0]  # First move up (z)
+        wpose.position.y = pos[1]  # and sideways (y)
+        wpose.position.z = pos[2]  # and sideways (y)
+        
         waypoints.append(copy.deepcopy(wpose))
 
         #wpose.position.x += scale * 0.1  # Second move forward/backwards in (x)

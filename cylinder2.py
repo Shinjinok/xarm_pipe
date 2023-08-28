@@ -65,12 +65,24 @@ class Cylinder:
             vecC = vecC / np.linalg.norm(vecC)
 
             # Now we calculate the rotation of the points with rodrigues equation
+            """
+            Rotate a set of point between two normal vectors using Rodrigues' formula.
+
+            :param P: Set of points `np.array (N,3)`.
+            :param n0: Orign vector `np.array (1,3)`.
+            :param n1: Destiny vector `np.array (1,3)`.
+
+            :returns: Set of points P, but rotated `np.array (N, 3)`
+
+            ---
+            """
             P_rot = rodrigues_rot(pt_samples, vecC, [0, 0, 1])
 
             # Find center from 3 points
             # http://paulbourke.net/geometry/circlesphere/
             # Find lines that intersect the points
             # Slope:
+
             ma = 0
             mb = 0
             while ma == 0:
@@ -101,8 +113,8 @@ class Cylinder:
             dist_pt = np.linalg.norm(dist_pt, axis=1)
 
             # Select indexes where distance is biggers than the threshold
-            
-            pt_id_inliers = np.where(np.abs(dist_pt - 0.1) <= thresh)[0]
+
+            pt_id_inliers = np.where(np.abs(dist_pt - radius) <= thresh)[0]
 
             if len(pt_id_inliers) > len(best_inliers):
                 best_inliers = pt_id_inliers
