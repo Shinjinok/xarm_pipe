@@ -271,19 +271,11 @@
   </link>
 
     <joint name="${prefix}hokuyo_joint" type="fixed">
-      <origin xyz="0 -0.0595 0" rpy="1.5708 0 0"/> 
+    <!--  <axis xyz="0 0 0" />-->
+      <origin xyz="0 -0.0595 0" rpy="1.5708 0 0"/>
       <parent link="${prefix}box_link"/>
       <child link="${prefix}hokuyo_link"/>
     </joint>
-
-    <link name="${prefix}link_tcp" />
-
-    <joint name="${prefix}joint_tcp" type="fixed">
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <parent link="${prefix}box_link" />
-      <child link="${prefix}link_tcp" />
-    </joint>
-
     <!-- <link name="${prefix}link_eef" />
     <joint name="${prefix}joint_eef" type="fixed">
       <origin xyz="0 0 0" rpy="0 0 0" />
