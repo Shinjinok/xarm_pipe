@@ -180,7 +180,7 @@ class MoveGroupPythonInterfaceTutorial(object):
         qz = np.cos(roll/2) * np.cos(pitch/2) * np.sin(yaw/2) - np.sin(roll/2) * np.sin(pitch/2) * np.cos(yaw/2)
         qw = np.cos(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
 
-        return [qx, qy, qz, qw]
+        return [qw, qx, qy, qz]
     
     def go_to_joint_state(self,j1,j2,j3,j4,j5,j6,speed_factor):
         # Copy class variables to local variables to make the web tutorials more clear.
@@ -206,7 +206,7 @@ class MoveGroupPythonInterfaceTutorial(object):
 
         # The go command can be called with joint values, poses, or without any
         # parameters if you have already set the pose or joint target for the group
-        move_group.go(joint_goal, wait=True)
+        move_group.go(joint_goal, wait=False)
 
         # Calling ``stop()`` ensures that there is no residual movement
         move_group.stop()
@@ -246,7 +246,7 @@ class MoveGroupPythonInterfaceTutorial(object):
 
         ## Now, we call the planner to compute the plan and execute it.
         # `go()` returns a boolean indicating whether the planning and execution was successful.
-        success = move_group.go(wait=True)
+        success = move_group.go(wait=False)
         # Calling `stop()` ensures that there is no residual movement
         move_group.stop()
         # It is always good to clear your targets after planning with poses.
@@ -266,7 +266,7 @@ class MoveGroupPythonInterfaceTutorial(object):
         # In practice, you should use the class variables directly unless you have a good
         # reason not to.
         move_group = self.move_group
-        move_group.set_max_velocity_scaling_factor(speed_factor)	
+        
         ## BEGIN_SUB_TUTORIAL plan_cartesian_path
         ##
         ## Cartesian Paths
@@ -278,6 +278,8 @@ class MoveGroupPythonInterfaceTutorial(object):
         waypoints = []
 
         wpose = move_group.get_current_pose().pose
+        
+        
         wpose.position.x = pos[0]  # First move up (z)
         wpose.position.y = pos[1]  # and sideways (y)
         wpose.position.z = pos[2]  # and sideways (y)
@@ -296,8 +298,55 @@ class MoveGroupPythonInterfaceTutorial(object):
         # ignoring the check for infeasible jumps in joint space, which is sufficient
         # for this tutorial.
         (plan, fraction) = move_group.compute_cartesian_path(
-            waypoints, 0.01, 0.0  # waypoints to follow  # eef_step
+            waypoints, speed_factor, 0.0  # waypoints to follow  # eef_step
         )  # jump_threshold
+
+        # Note: We are just planning, not asking move_group to actually move the robot yet:
+        return plan, fraction
+
+        ## END_SUB_TUTORIAL
+
+    def plan_scan_path(self, pos1,pos2):
+        # Copy class variables to local variables to make the web tutorials more clear.
+        # In practice, you should use the class variables directly unless you have a good
+        # reason not to.
+        move_group = self.move_group
+        
+        ## BEGIN_SUB_TUTORIAL plan_cartesian_path
+        ##
+        ## Cartesian Paths
+        ## ^^^^^^^^^^^^^^^
+        ## You can plan a Cartesian path directly by specifying a list of waypoints
+        ## for the end-effector to go through. If executing  interactively in a
+        ## Python shell, set scale = 1.0.
+        ##
+        waypoints1 = []
+
+        wpose = move_group.get_current_pose().pose
+        wpose.position.x = pos1[0]  # First move up (z)
+        wpose.position.y = pos1[1]  # and sideways (y)
+        wpose.position.z = pos1[2]  # and sideways (y)
+        
+        waypoints1.append(copy.deepcopy(wpose))
+
+        (plan1, fraction) = move_group.compute_cartesian_path(
+            waypoints1, pos1[3], 0.0  # waypoints to follow  # eef_step
+        )
+
+        waypoints2 = []
+
+        wpose.position.x = pos2[0]  # First move up (z)
+        wpose.position.y = pos2[1]  # and sideways (y)
+        wpose.position.z = pos2[2]  # and sideways (y)
+        
+        waypoints1.append(copy.deepcopy(wpose))
+
+        (plan2, fraction) = move_group.compute_cartesian_path(
+            waypoints2, pos2[3], 0.0  # waypoints to follow  # eef_step
+        )
+        
+        plan = plan1 + plan2
+
 
         # Note: We are just planning, not asking move_group to actually move the robot yet:
         return plan, fraction
@@ -342,7 +391,7 @@ class MoveGroupPythonInterfaceTutorial(object):
         ## ^^^^^^^^^^^^^^^^
         ## Use execute if you would like the robot to follow
         ## the plan that has already been computed:
-        move_group.execute(plan, wait=True)
+        move_group.execute(plan, wait=False)
 
         ## **Note:** The robot's current joint state must be within some tolerance of the
         ## first waypoint in the `RobotTrajectory`_ or ``execute()`` will fail

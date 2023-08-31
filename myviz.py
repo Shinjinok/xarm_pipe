@@ -55,11 +55,12 @@ except ImportError:
 
 ## Finally import the RViz bindings themselves.
 from rviz import bindings as rviz
-
-
+from threading import Thread
+from multiprocessing import Process, Queue
 tutorial = moveit_function2.MoveGroupPythonInterfaceTutorial()
 ##rospy.init_node('marker', anonymous=True, log_level=rospy.INFO, disable_signals=False)
 ## The MyViz class is the main container widget.
+
 class MyViz( QWidget ):
 
     ## MyViz Constructor
@@ -169,9 +170,9 @@ class MyViz( QWidget ):
         rospy.init_node("move_group_python_interface_tutorial", anonymous=True)
         rospy.Subscriber('/cloud2', PointCloud2, self.callback)
         self.point_cloud = o3d.geometry.PointCloud()
-
         self.markers = rviz_tools.RvizMarkers('world', 'visualization_marker')
-
+        
+      
         
 
 
@@ -190,19 +191,26 @@ class MyViz( QWidget ):
 
     ## The view buttons just call switchToView() with the name of a saved view.
     def onHomeButtonClick( self ):
+        
         print( " Go to home position")
-        tutorial.go_to_joint_state(0,0,0,0,-3.14/2.0,0,1)
+        tutorial.go_to_joint_state(0,0,0,0,-3.14/2,0,1)
         
     def onScanHButtonClick( self ):
+        """
         print( " Go to start position")
-        #tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,-3.14/2.0,1)
-
-        tutorial.go_to_pose_goal(np.array([0.2, -0.3,0.2]),np.array([-3.14/2.0,0,0]),1)
+        plan, fraction = tutorial.plan_cartesian_path(np.array([0.3, 0.3,0.3]),0.1)
+        print("fraction: ",fraction)
+        tutorial.execute_plan(plan)
+"""
         print( " Horizental Scaning")
-        plan, fraction = tutorial.plan_cartesian_path(np.array([0.2, 0.3,0.2]),0.1)
+        plan, fraction = tutorial.plan_cartesian_path(np.array([0.3, -0.3,0.3]),0.1)
+        print("fraction: ",fraction)
         tutorial.execute_plan(plan)
         print( " Scaning Done")
-        #tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,3.14/2.0,0.05)
+        
+       ## plan, fraction = tutorial.plan_cartplan_scan_path(np.array([0.3, 0.3,0.3,0.1]),[0.3, -0.3,0.3,0.0005])
+       ## tutorial.execute_plan(plan)
+
     def onScanVButtonClick( self ):
         print( " Go to start position")
         #tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,-3.14/2.0,1)
@@ -280,4 +288,5 @@ if __name__ == '__main__':
     myviz = MyViz()
     myviz.resize( 1000, 500 )
     myviz.show()
+    
     app.exec_()
