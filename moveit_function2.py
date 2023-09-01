@@ -206,7 +206,7 @@ class MoveGroupPythonInterfaceTutorial(object):
 
         # The go command can be called with joint values, poses, or without any
         # parameters if you have already set the pose or joint target for the group
-        move_group.go(joint_goal, wait=False)
+        move_group.go(joint_goal, wait=True)
 
         # Calling ``stop()`` ensures that there is no residual movement
         move_group.stop()
@@ -219,7 +219,7 @@ class MoveGroupPythonInterfaceTutorial(object):
         current_joints = self.move_group.get_current_joint_values()
         return all_close(joint_goal, current_joints, 0.01)
 
-    def go_to_pose_goal(self,pos,radian,speed_factor):
+    def go_to_pose_goal(self, pos, speed_factor):
         # Copy class variables to local variables to make the web tutorials more clear.
         # In practice, you should use the class variables directly unless you have a good
         # reason not to.
@@ -232,7 +232,7 @@ class MoveGroupPythonInterfaceTutorial(object):
         ## We can plan a motion for this group to a desired pose for the
         ## end-effector:
         pose_goal = geometry_msgs.msg.Pose()
-        qt = self.euler_to_quaternion(radian[0],radian[1],radian[2])
+        qt = self.euler_to_quaternion(pos[3],pos[4],pos[5])
         pose_goal.orientation.x = qt[0]
         pose_goal.orientation.y = qt[1]
         pose_goal.orientation.z = qt[2]
@@ -246,7 +246,7 @@ class MoveGroupPythonInterfaceTutorial(object):
 
         ## Now, we call the planner to compute the plan and execute it.
         # `go()` returns a boolean indicating whether the planning and execution was successful.
-        success = move_group.go(wait=False)
+        success = move_group.go(wait=True)
         # Calling `stop()` ensures that there is no residual movement
         move_group.stop()
         # It is always good to clear your targets after planning with poses.
@@ -289,7 +289,6 @@ class MoveGroupPythonInterfaceTutorial(object):
         #wpose.position.x += scale * 0.1  # Second move forward/backwards in (x)
         #waypoints.append(copy.deepcopy(wpose))
 
-        #wpose.position.y -= scale * 0.1  # Third move sideways (y)
         #waypoints.append(copy.deepcopy(wpose))
 
         # We want the Cartesian path to be interpolated at a resolution of 1 cm
@@ -306,53 +305,7 @@ class MoveGroupPythonInterfaceTutorial(object):
 
         ## END_SUB_TUTORIAL
 
-    def plan_scan_path(self, pos1,pos2):
-        # Copy class variables to local variables to make the web tutorials more clear.
-        # In practice, you should use the class variables directly unless you have a good
-        # reason not to.
-        move_group = self.move_group
-        
-        ## BEGIN_SUB_TUTORIAL plan_cartesian_path
-        ##
-        ## Cartesian Paths
-        ## ^^^^^^^^^^^^^^^
-        ## You can plan a Cartesian path directly by specifying a list of waypoints
-        ## for the end-effector to go through. If executing  interactively in a
-        ## Python shell, set scale = 1.0.
-        ##
-        waypoints1 = []
-
-        wpose = move_group.get_current_pose().pose
-        wpose.position.x = pos1[0]  # First move up (z)
-        wpose.position.y = pos1[1]  # and sideways (y)
-        wpose.position.z = pos1[2]  # and sideways (y)
-        
-        waypoints1.append(copy.deepcopy(wpose))
-
-        (plan1, fraction) = move_group.compute_cartesian_path(
-            waypoints1, pos1[3], 0.0  # waypoints to follow  # eef_step
-        )
-
-        waypoints2 = []
-
-        wpose.position.x = pos2[0]  # First move up (z)
-        wpose.position.y = pos2[1]  # and sideways (y)
-        wpose.position.z = pos2[2]  # and sideways (y)
-        
-        waypoints1.append(copy.deepcopy(wpose))
-
-        (plan2, fraction) = move_group.compute_cartesian_path(
-            waypoints2, pos2[3], 0.0  # waypoints to follow  # eef_step
-        )
-        
-        plan = plan1 + plan2
-
-
-        # Note: We are just planning, not asking move_group to actually move the robot yet:
-        return plan, fraction
-
-        ## END_SUB_TUTORIAL
-
+    
     def display_trajectory(self, plan):
         # Copy class variables to local variables to make the web tutorials more clear.
         # In practice, you should use the class variables directly unless you have a good
@@ -391,7 +344,7 @@ class MoveGroupPythonInterfaceTutorial(object):
         ## ^^^^^^^^^^^^^^^^
         ## Use execute if you would like the robot to follow
         ## the plan that has already been computed:
-        move_group.execute(plan, wait=False)
+        move_group.execute(plan, wait=True)
 
         ## **Note:** The robot's current joint state must be within some tolerance of the
         ## first waypoint in the `RobotTrajectory`_ or ``execute()`` will fail
@@ -540,7 +493,6 @@ class MoveGroupPythonInterfaceTutorial(object):
         return self.wait_for_state_update(
             box_is_attached=False, box_is_known=False, timeout=timeout
         )
-
 
 def main():
     try:

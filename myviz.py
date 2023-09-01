@@ -57,9 +57,65 @@ except ImportError:
 from rviz import bindings as rviz
 from threading import Thread
 from multiprocessing import Process, Queue
-tutorial = moveit_function2.MoveGroupPythonInterfaceTutorial()
+
 ##rospy.init_node('marker', anonymous=True, log_level=rospy.INFO, disable_signals=False)
 ## The MyViz class is the main container widget.
+from PyQt5.QtCore import QObject
+
+class Worker(QThread):
+
+    def __init__(self):
+        super().__init__()
+        self.markers = rviz_tools.RvizMarkers('world', 'visualization_marker')
+        self.tutorial = moveit_function2.MoveGroupPythonInterfaceTutorial()
+        self.working = ""
+        self.pos_goal = np.array([0,0,0,0,1.5708,0])
+        self.pcd = o3d.geometry.PointCloud()
+
+    def run(self):
+       
+        if self.working == "home":
+            self.tutorial.go_to_joint_state(0,0,0,0,0,0,1)
+
+        if self.working == "hscan":
+            print( " Go to start position")
+            self.tutorial.go_to_joint_state(0,0,0,0,-3.14/2,0,1)
+            plan, fraction = self.tutorial.plan_cartesian_path(np.array([0.3, 0.3,0.3]),0.1)
+            self.tutorial.execute_plan(plan)
+            print( "Horizental Scaning")
+            plan, fraction = self.tutorial.plan_cartesian_path(np.array([0.3, -0.3,0.3]),0.001)
+            self.tutorial.execute_plan(plan)
+            print( "Done")
+
+        if self.working == "vscan":
+            print( " Go to start position")
+            self.tutorial.go_to_joint_state(0,0,0,0,-3.14/2,3.14/2,1)
+            plan, fraction = self.tutorial.plan_cartesian_path(np.array([0.3, 0, 0.5]),0.1)
+            self.tutorial.execute_plan(plan)
+            print( "Vertical Scaning")
+            plan, fraction = self.tutorial.plan_cartesian_path(np.array([0.3, 0, 0.8]),0.001)
+            self.tutorial.execute_plan(plan)
+            print( "Done")
+
+        if self.working == "go_target":
+            print( "Go to Cylinder Center Position")
+            self.tutorial.go_to_pose_goal(self.pos_goal,0.5)
+
+        if self.working == "marker":
+            #pcd2 = fp.get_flattened_pcds2(source=self.point_cloud,A=0,B=1,C=0,D=0,x0=0,y0=1000,z0=0)
+            print("Finding Cylinder ...")
+            center, normal, radius = fp.get_cylinder(self.pcd, thresh=0.01, maxIteration=10000)
+            self.pos_goal[0] = center[0]
+            self.pos_goal[2] = center[2]
+            self.targepoint = center
+            print("Cylinder Center pos: ", center)
+            P=fp.get_clylinder_pos(center,normal)
+            #publishCylinder(self, pose, color, height, radius, lifetime=None):
+            self.markers.publishCylinder(pose = P, color = [0,1,0,0.1] ,height= 0.2,
+                radius = radius*2, lifetime=0) # pose, color, height, radius, lifetime    
+            print("Marker published")
+        
+
 
 class MyViz( QWidget ):
 
@@ -137,15 +193,15 @@ class MyViz( QWidget ):
         
         h_layout = QHBoxLayout()
         
-        home_button = QPushButton( "Home pose" )
+        home_button = QPushButton( "Home" )
         home_button.clicked.connect( self.onHomeButtonClick )
         h_layout.addWidget( home_button )
         
-        scanH_button = QPushButton( "Scan H" )
+        scanH_button = QPushButton( "H Scan" )
         scanH_button.clicked.connect( self.onScanHButtonClick )
         h_layout.addWidget( scanH_button )
 
-        scanV_button = QPushButton( "Scan V" )
+        scanV_button = QPushButton( "V Scan" )
         scanV_button.clicked.connect( self.onScanVButtonClick )
         h_layout.addWidget( scanV_button )
 
@@ -157,7 +213,7 @@ class MyViz( QWidget ):
         go_button.clicked.connect( self.onGoButtonClick )
         h_layout.addWidget( go_button )
         
-        marker_button = QPushButton( "marker" )
+        marker_button = QPushButton( "Marker" )
         marker_button.clicked.connect( self.onMarkerButtonClick )
         h_layout.addWidget( marker_button )
 
@@ -170,11 +226,11 @@ class MyViz( QWidget ):
         rospy.init_node("move_group_python_interface_tutorial", anonymous=True)
         rospy.Subscriber('/cloud2', PointCloud2, self.callback)
         self.point_cloud = o3d.geometry.PointCloud()
-        self.markers = rviz_tools.RvizMarkers('world', 'visualization_marker')
-        
-      
         
 
+        self.worker = Worker()
+    
+  
 
     ## Handle GUI events
     ## ^^^^^^^^^^^^^^^^^
@@ -191,52 +247,31 @@ class MyViz( QWidget ):
 
     ## The view buttons just call switchToView() with the name of a saved view.
     def onHomeButtonClick( self ):
-        
-        print( " Go to home position")
-        tutorial.go_to_joint_state(0,0,0,0,-3.14/2,0,1)
+        self.worker.start()
+        self.worker.working = "home"
         
     def onScanHButtonClick( self ):
-        """
-        print( " Go to start position")
-        plan, fraction = tutorial.plan_cartesian_path(np.array([0.3, 0.3,0.3]),0.1)
-        print("fraction: ",fraction)
-        tutorial.execute_plan(plan)
-"""
-        print( " Horizental Scaning")
-        plan, fraction = tutorial.plan_cartesian_path(np.array([0.3, -0.3,0.3]),0.1)
-        print("fraction: ",fraction)
-        tutorial.execute_plan(plan)
-        print( " Scaning Done")
-        
-       ## plan, fraction = tutorial.plan_cartplan_scan_path(np.array([0.3, 0.3,0.3,0.1]),[0.3, -0.3,0.3,0.0005])
-       ## tutorial.execute_plan(plan)
+        self.worker.start()
+        self.worker.working = "hscan"
 
     def onScanVButtonClick( self ):
-        print( " Go to start position")
-        #tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,-3.14/2.0,1)
+        self.worker.start()
+        self.worker.working = "vscan"
 
-        tutorial.go_to_pose_goal(np.array([-0.2, 0.2,0.2]),np.array([0,0,0]),1)
-        print( " Vertical Scaning")
-        plan, fraction = tutorial.plan_cartesian_path(np.array([0.2, 0.2,0.2]),0.1)
-        tutorial.execute_plan(plan)
-        print( " Scaning Done")
-        #tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,3.14/2.0,0.05)
     def onSaveButtonClick( self ):
         o3d.io.write_point_cloud("point_pipe.pcd", self.point_cloud)
 
-    def onGoButtonClick( self ):    
-        print( " Go to start position")
-        tutorial.go_to_pose_goal(self.targepoint- np.array([0.3,0,0]),np.array([0,0,0.0]),1)
+    def onGoButtonClick( self ):
+        self.worker.start()
+        self.worker.working = "go_target" 
+        #self.worker.pos_goal = np.array([0, 0, 0, 0, 0, 0])  #x,y,z,roll,pitch,yaw 
+                
 
     def onMarkerButtonClick( self ):
-        #pcd2 = fp.get_flattened_pcds2(source=self.point_cloud,A=0,B=1,C=0,D=0,x0=0,y0=1000,z0=0)
-        center, normal, radius = fp.get_cylinder(self.point_cloud, thresh=0.01, maxIteration=10000)
-        self.targepoint = center
-        P=fp.get_clylinder_pos(center,normal)
-
-        #publishCylinder(self, pose, color, height, radius, lifetime=None):
-        self.markers.publishCylinder(pose = P, color ='blue', height= 0.2,
-                                     radius = radius*2, lifetime=0) # pose, color, height, radius, lifetime    
+        self.worker.start()
+        self.worker.working = "marker"
+        self.worker.pcd = self.point_cloud
+        
            
     ## switchToView() works by looping over the views saved in the
     ## ViewManager and looking for one with a matching name.
@@ -255,6 +290,7 @@ class MyViz( QWidget ):
     def callback(self, ros_cloud):
         self.point_cloud.points = o3d.utility.Vector3dVector(ros_numpy.point_cloud2
                                         .pointcloud2_to_xyz_array(ros_cloud))
+ 
 ## Start the Application
 ## ^^^^^^^^^^^^^^^^^^^^^
 ##
@@ -284,9 +320,8 @@ else:
             
 if __name__ == '__main__':
     app = QApplication( sys.argv )
-
+    
     myviz = MyViz()
     myviz.resize( 1000, 500 )
     myviz.show()
-    
     app.exec_()
