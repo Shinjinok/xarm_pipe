@@ -1,8 +1,0 @@
-prefix=/home/sjo/laser_ws/install
-
-Name: laser_assembler
-Description: Description of laser_assembler
-Version: 0.1.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 
