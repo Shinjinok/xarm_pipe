@@ -1,0 +1,2 @@
+laser_assembler
+-DCATKIN_DEVEL_PREFIX=/home/sjo/laser_ws/devel -DCMAKE_INSTALL_PREFIX=/home/sjo/laser_ws/install -G Unix Makefiles

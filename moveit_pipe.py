@@ -39,10 +39,15 @@ def get_quaternion_from_euler(roll, pitch, yaw):
 if __name__ == "__main__":
     
     
-    rospy.Subscriber('/cloud2', PointCloud2, callback)  
+    rospy.Subscriber('/cloud2', PointCloud2, callback)
+
+    
     
     try: 
         tutorial = moveit_function2.MoveGroupPythonInterfaceTutorial()
+        print( " Go to start position")
+    
+        tutorial.go_to_joint_state(0,0,0,0,-3.14/2,0,1)
         i=0
         qt = get_quaternion_from_euler(-1.507,0,0)
         while i < 10000:
@@ -52,13 +57,13 @@ if __name__ == "__main__":
             
             #ret=tutorial.go_to_pose_goal([0.2,0.4,0.2],qt)
 
-            plan, fraction = tutorial.plan_cartesian_path(0.2,0.4,0.2,1)
+            plan, fraction = tutorial.plan_cartesian_path([0.3,0.3,0.3],0.01)
             tutorial.execute_plan(plan)
             #print(ret)
             print( " tutorial.go_to_joint_state2")
             #ret = tutorial.go_to_joint_state(0.0,0.0,0.0,0.0,-3.14/2.0,3.14/6.0,1)
             #ret=tutorial.go_to_pose_goal([0.2,-0.4,0.2], qt)
-            plan, fraction = tutorial.plan_cartesian_path(0.2,-0.4,0.2,1)
+            plan, fraction = tutorial.plan_cartesian_path([0.3,-0.3,0.3],0.01)
             tutorial.execute_plan(plan)
             
             i = i + 1
