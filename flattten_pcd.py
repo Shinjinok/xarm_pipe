@@ -7,6 +7,12 @@ from tf import transformations
 from geometry_msgs.msg import Pose, Point, Quaternion, Vector3, Polygon
 import matplotlib.pyplot as plt
 
+MaxX = 1.5
+MinX = 0
+MaxZ = 1.5
+MinZ = 0
+MaxR = 1
+
 def get_flattened_pcds2(source,A,B,C,D,x0,y0,z0):
     x1 = np.asarray(source.points)[:,0]
     y1 = np.asarray(source.points)[:,1]
@@ -61,8 +67,12 @@ def get_cylinder(pcd,thresh=0.1,maxIteration=1000):
     outlier_cloud.colors = o3d.utility.Vector3dVector(colors[:, :3])
     #print("length label:  ",len(labels))
     #print("length outlier_cloud:  ",len(np.array(outlier_cloud.points)))
-    cluster = o3d.geometry.PointCloud()
+    center = []
+    normal = []
+    radius = []
+    
     for c in range(max_label+1):
+        print(c)
         cluster = [i for i, n in enumerate(labels.tolist()) if n == c]
         #print(cluster) 
         cluster = outlier_cloud.select_by_index(cluster)
@@ -71,16 +81,20 @@ def get_cylinder(pcd,thresh=0.1,maxIteration=1000):
     #o3d.visualization.draw_geometries([outlier_cloud])
         cil = pyrsc.Cylinder()
         points = np.asarray(cluster.points)
-        center, normal, radius, inliers = cil.fit(points, thresh, maxIteration)
-        print(c)
-        print("center: " + str(center))
-        print("radius: " + str(radius))
-        print("vecC: " + str(normal))
-        if radius < 0.2:
-             center1, normal1, radius1 = center, normal, radius
+        cen, nor, rad, inliers = cil.fit(points, thresh, maxIteration)
+        print("center: " + str(cen))
+        print("radius: " + str(rad))
+        print("vecC: " + str(nor))
+        if (rad < MaxR and cen[0] > MinX and cen[0] < MaxX and cen[2] > MinZ and cen[2] < MaxZ):
+            center.append(cen)
+            normal.append(nor)
+            radius.append(rad)
+
+    
+        
     
     
-    return center1, normal1, radius1
+    return center, normal, radius
 
 def get_clylinder_mesh(center, normal, radius):
 

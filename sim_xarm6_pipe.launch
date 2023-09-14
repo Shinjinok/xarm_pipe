@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find xarm_gazebo)/launch/laser_dual_robot_beside_table.launch"/>
+    <include file="$(find dual_xarm6_moveit_config)/launch/laser_xarm6_moveit_gazebo.launch"/>
+    <include file="./laser_assembler.launch"/>
+</launch>    

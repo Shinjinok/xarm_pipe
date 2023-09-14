@@ -24,7 +24,7 @@ import math
 from geometry_msgs.msg import Pose, Point, Quaternion, Vector3, Polygon
 from tf import transformations # rotation_matrix(), concatenate_matrices()
 
-import moveit_function2
+import moveit_function3
 import test3dplot
 import rospy
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
@@ -67,35 +67,26 @@ class Worker(QThread):
     def __init__(self):
         super().__init__()
         self.markers = rviz_tools.RvizMarkers('world', 'visualization_marker')
-        self.tutorial = moveit_function2.MoveGroupPythonInterfaceTutorial()
+        self.tutorial = moveit_function3.MoveGroupPythonInterfaceTutorial("L_xarm6")
         self.working = ""
-        self.pos_goal = np.array([0.3,0,0.3,0,0,0])
+        self.pos_goal = np.array([0,0,0,0,1.5708,0])
         self.pcd = o3d.geometry.PointCloud()
-        self.center = np.array([0.3, 0, 0.5])
+        self.mvg = 0
 
     def run(self):
        
         if self.working == "home":
-            move_group = "L_xarm6"
-            joint = np.array([0,0,0,0,-3.14/2,0])
-            speed_factor = 1
-            self.tutorial.go_to_joint_state(move_group,joint,speed_factor)
-            move_group = "R_xarm6"
-            joint = np.array([0,-1,0,0,-3.14/2,0])
-            self.tutorial.go_to_joint_state(move_group,joint,speed_factor)
+            self.tutorial.go_to_joint_state(0,0,0,0,-3.14/2,0,1)
+            #self.tutorial.go_to_joint_state(0,0,0,0,-3.14/2,0,1,1)
 
         if self.working == "hscan":
             print( " Go to start position")
-            move_group = "L_xarm6"
-            position = np.array([0.3, 0.3,0.3])
-            speed_factor = 0.1
-            plan, fraction = self.tutorial.plan_cartesian_path(move_group,position,speed_factor)
-            self.tutorial.execute_plan(plan,move_group)
+            self.tutorial.go_to_joint_state(0,0,0,0,-3.14/2,0,1,0)
+            plan, fraction = self.tutorial.plan_cartesian_path(np.array([0.3, 0.3,0.3]),0.1,0)
+            self.tutorial.execute_plan(plan,0)
             print( "Horizental Scaning")
-            position = np.array([0.3, -0.3,0.3])
-            speed_factor = 0.01
-            plan, fraction = self.tutorial.plan_cartesian_path(move_group,position,speed_factor)
-            self.tutorial.execute_plan(plan,move_group)
+            plan, fraction = self.tutorial.plan_cartesian_path(np.array([0.3, -0.3,0.3]),0.001,0)
+            self.tutorial.execute_plan(plan,0)
             print( "Done")
 
         if self.working == "vscan":
@@ -109,48 +100,86 @@ class Worker(QThread):
             print( "Done")
 
         if self.working == "go_target":
-            print( "Tcp Go to Cylinder Center Position")
-            self.pos_goal[0] = self.center[0] - 0.2
-            self.pos_goal[1] = self.center[1]
-            self.pos_goal[2] = self.center[2]
-            self.pos_goal[3] = 0
-            self.pos_goal[4] = 0
+            print( "Go to Cylinder Center Position")
+            self.pos_goal[0] = self.pos_goal[0] - 0.2
             self.pos_goal[5] = 0
-            move_group = "L_xarm6"
-            print(self.center)
-            print(self.pos_goal)
-            self.tutorial.go_to_pose_goal(move_group, self.pos_goal,0.5)
-
-            print( "Pad Go to Cylinder Center Position")
-            self.pos_goal[0] = self.center[0] + 0.2
-            self.pos_goal[1] = self.center[1]
-            self.pos_goal[2] = self.center[2]
-            self.pos_goal[3] = 0
-            self.pos_goal[4] = 0
-            self.pos_goal[5] = 0
-            move_group = "R_xarm6"
-            print(self.pos_goal)
-            self.tutorial.go_to_pose_goal(move_group, self.pos_goal,0.5)
-
+            self.tutorial.go_to_pose_goal(self.pos_goal,0.5,0)
+            self.pos_goal[0] = self.pos_goal[0] + 0.4
+            self.pos_goal[5] = 3.14
+            self.tutorial.go_to_pose_goal(self.pos_goal,0.5,1)
 
         if self.working == "marker":
             #pcd2 = fp.get_flattened_pcds2(source=self.point_cloud,A=0,B=1,C=0,D=0,x0=0,y0=1000,z0=0)
             print("Finding Cylinder ...")
             center, normal, radius = fp.get_cylinder(self.pcd, thresh=0.01, maxIteration=10000)
-            #self.pos_goal[0] = center[0]
-            #self.pos_goal[2] = center[2]
-            #self.targepoint = center
+            self.pos_goal[0] = center[0]
+            self.pos_goal[2] = center[2]
+            self.targepoint = center
             print("Cylinder Center pos: ", center)
-            for c in range(len(center)):
-                print("Cylinder Center pos: ", center[c] ," radius", radius[c])
-                P=fp.get_clylinder_pos(center[c],normal[c])
-                #publishCylinder(self, pose, color, height, radius, lifetime=None):
-                self.markers.publishCylinder(pose = P, color = [0,1,0,0.5] ,height= 0.2,
-                    radius = radius[c]*2, lifetime=0) # pose, color, height, radius, lifetime    
-                self.center = center[c]
+            P=fp.get_clylinder_pos(center,normal)
+            #publishCylinder(self, pose, color, height, radius, lifetime=None):
+            self.markers.publishCylinder(pose = P, color = [0,1,0,0.5] ,height= 0.2,
+                radius = radius*2, lifetime=0) # pose, color, height, radius, lifetime    
             print("Marker published")
-            
-        
+
+class WorkerR(QThread):
+
+    def __init__(self):
+        super().__init__()
+        #self.markers = rviz_tools.RvizMarkers('world', 'visualization_marker')
+        self.tutorial = moveit_function3.MoveGroupPythonInterfaceTutorial("R_xarm6")
+        self.working = ""
+        self.pos_goal = np.array([0,0,0,0,1.5708,0])
+        self.pcd = o3d.geometry.PointCloud()
+        self.mvg = 0
+
+    def run(self):
+       
+        if self.working == "home":
+            self.tutorial.go_to_joint_state(0,-1,0,0,-3.14/2,0,1)
+
+        if self.working == "hscan":
+            print( " Go to start position")
+            self.tutorial.go_to_joint_state(0,0,0,0,-3.14/2,0,1,0)
+            plan, fraction = self.tutorial.plan_cartesian_path(np.array([0.3, 0.3,0.3]),0.1,0)
+            self.tutorial.execute_plan(plan,0)
+            print( "Horizental Scaning")
+            plan, fraction = self.tutorial.plan_cartesian_path(np.array([0.3, -0.3,0.3]),0.001,0)
+            self.tutorial.execute_plan(plan,0)
+            print( "Done")
+
+        if self.working == "vscan":
+            print( " Go to start position")
+            self.tutorial.go_to_joint_state(0,0,0,0,-3.14/2,3.14/2,1)
+            plan, fraction = self.tutorial.plan_cartesian_path(np.array([0.3, 0, 0.5]),0.1)
+            self.tutorial.execute_plan(plan)
+            print( "Vertical Scaning")
+            plan, fraction = self.tutorial.plan_cartesian_path(np.array([0.3, 0, 0.8]),0.001)
+            self.tutorial.execute_plan(plan)
+            print( "Done")
+
+        if self.working == "go_target":
+            print( "Go to Cylinder Center Position")
+            self.pos_goal[0] = self.pos_goal[0] - 0.2
+            self.pos_goal[5] = 0
+            self.tutorial.go_to_pose_goal(self.pos_goal,0.5,0)
+            self.pos_goal[0] = self.pos_goal[0] + 0.4
+            self.pos_goal[5] = 3.14
+            self.tutorial.go_to_pose_goal(self.pos_goal,0.5,1)
+
+        if self.working == "marker":
+            #pcd2 = fp.get_flattened_pcds2(source=self.point_cloud,A=0,B=1,C=0,D=0,x0=0,y0=1000,z0=0)
+            print("Finding Cylinder ...")
+            center, normal, radius = fp.get_cylinder(self.pcd, thresh=0.01, maxIteration=10000)
+            self.pos_goal[0] = center[0]
+            self.pos_goal[2] = center[2]
+            self.targepoint = center
+            print("Cylinder Center pos: ", center)
+            P=fp.get_clylinder_pos(center,normal)
+            #publishCylinder(self, pose, color, height, radius, lifetime=None):
+            self.markers.publishCylinder(pose = P, color = [0,1,0,0.5] ,height= 0.2,
+                radius = radius*2, lifetime=0) # pose, color, height, radius, lifetime    
+            print("Marker published")        
 
 
 class MyViz( QWidget ):
@@ -265,6 +294,7 @@ class MyViz( QWidget ):
         
 
         self.worker = Worker()
+        self.workerR = WorkerR()
     
   
 
@@ -285,6 +315,8 @@ class MyViz( QWidget ):
     def onHomeButtonClick( self ):
         self.worker.start()
         self.worker.working = "home"
+        self.workerR.start()
+        self.workerR.working = "home"
         
     def onScanHButtonClick( self ):
         self.worker.start()

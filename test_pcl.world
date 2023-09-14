@@ -1,8 +1,26 @@
 <sdf version='1.7'>
   <world name='default'>
+    <light name='sun' type='directional'>
+      <cast_shadows>1</cast_shadows>
+      <pose>0 0 10 0 -0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+      <spot>
+        <inner_angle>0</inner_angle>
+        <outer_angle>0</outer_angle>
+        <falloff>0</falloff>
+      </spot>
+    </light>
     <model name='ground_plane'>
       <static>1</static>
-      <link name='link'>
+      <link name='link_'>
         <collision name='collision'>
           <geometry>
             <plane>
@@ -48,27 +66,129 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <light name='sun' type='directional'>
-      <cast_shadows>1</cast_shadows>
-      <pose>0 0 10 0 -0 0</pose>
-      <diffuse>0.8 0.8 0.8 1</diffuse>
-      <specular>0.2 0.2 0.2 1</specular>
-      <attenuation>
-        <range>1000</range>
-        <constant>0.9</constant>
-        <linear>0.01</linear>
-        <quadratic>0.001</quadratic>
-      </attenuation>
-      <direction>-0.5 0.1 -0.9</direction>
-      <spot>
-        <inner_angle>0</inner_angle>
-        <outer_angle>0</outer_angle>
-        <falloff>0</falloff>
-      </spot>
-    </light>
+    <gravity>0 0 -9.8</gravity>
+    <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
+    <atmosphere type='adiabatic'/>
+    <physics type='ode'>
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+    <scene>
+      <ambient>0.4 0.4 0.4 1</ambient>
+      <background>0.7 0.7 0.7 1</background>
+      <shadows>1</shadows>
+    </scene>
+    <wind/>
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <latitude_deg>0</latitude_deg>
+      <longitude_deg>0</longitude_deg>
+      <elevation>0</elevation>
+      <heading_deg>0</heading_deg>
+    </spherical_coordinates>
+    <model name='D200pipe'>
+      <link name='link_0'>
+        <inertial>
+          <mass>1</mass>
+          <inertia>
+            <ixx>0.166667</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.166667</iyy>
+            <iyz>0</iyz>
+            <izz>0.166667</izz>
+          </inertia>
+          <pose>0 0 0 0 -0 0</pose>
+        </inertial>
+        <pose>-0 0 0 0 -0 0</pose>
+        <gravity>1</gravity>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <enable_wind>0</enable_wind>
+        <visual name='visual'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <uri>/home/sjo/xarm_pipe/pipe_model/D200pipe.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+          <material>
+            <lighting>1</lighting>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Grey</name>
+            </script>
+            <shader type='pixel'/>
+          </material>
+          <transparency>0</transparency>
+          <cast_shadows>1</cast_shadows>
+        </visual>
+        <collision name='collision'>
+          <laser_retro>0</laser_retro>
+          <max_contacts>10</max_contacts>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <uri>/home/sjo/xarm_pipe/pipe_model/D200pipe.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>1</mu>
+                <mu2>1</mu2>
+                <fdir1>0 0 0</fdir1>
+                <slip1>0</slip1>
+                <slip2>0</slip2>
+              </ode>
+              <torsional>
+                <coefficient>1</coefficient>
+                <patch_radius>0</patch_radius>
+                <surface_radius>0</surface_radius>
+                <use_patch_radius>1</use_patch_radius>
+                <ode>
+                  <slip>0</slip>
+                </ode>
+              </torsional>
+            </friction>
+            <bounce>
+              <restitution_coefficient>0</restitution_coefficient>
+              <threshold>1e+06</threshold>
+            </bounce>
+            <contact>
+              <collide_without_contact>0</collide_without_contact>
+              <collide_without_contact_bitmask>1</collide_without_contact_bitmask>
+              <collide_bitmask>1</collide_bitmask>
+              <ode>
+                <soft_cfm>0</soft_cfm>
+                <soft_erp>0.2</soft_erp>
+                <kp>1e+13</kp>
+                <kd>1</kd>
+                <max_vel>0.01</max_vel>
+                <min_depth>0</min_depth>
+              </ode>
+              <bullet>
+                <split_impulse>1</split_impulse>
+                <split_impulse_penetration_threshold>-0.01</split_impulse_penetration_threshold>
+                <soft_cfm>0</soft_cfm>
+                <soft_erp>0.2</soft_erp>
+                <kp>1e+13</kp>
+                <kd>1</kd>
+              </bullet>
+            </contact>
+          </surface>
+        </collision>
+      </link>
+      <static>0</static>
+      <allow_auto_disable>1</allow_auto_disable>
+      <pose>0.0141 0.000633 0 0 -0 0</pose>
+    </model>
     <model name='table'>
       <static>1</static>
-      <link name='link'>
+      <link name='link__'>
         <collision name='surface'>
           <pose>0 0 1 0 -0 0</pose>
           <geometry>
@@ -259,711 +379,27 @@
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
-      <pose>0 -0.84 0 0 -0 0</pose>
-    </model>
-    <physics type='ode'>
-      <max_step_size>0.001</max_step_size>
-      <real_time_factor>1</real_time_factor>
-      <real_time_update_rate>1000</real_time_update_rate>
-    </physics>
-    <gravity>0 0 -9.81</gravity>
-    <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
-    <atmosphere type='adiabatic'/>
-    <scene>
-      <ambient>0.4 0.4 0.4 1</ambient>
-      <background>0.7 0.7 0.7 1</background>
-      <shadows>1</shadows>
-    </scene>
-    <wind/>
-    <spherical_coordinates>
-      <surface_model>EARTH_WGS84</surface_model>
-      <latitude_deg>0</latitude_deg>
-      <longitude_deg>0</longitude_deg>
-      <elevation>0</elevation>
-      <heading_deg>0</heading_deg>
-    </spherical_coordinates>
-    <model name='xarm6'>
-      <joint name='world_joint' type='fixed'>
-        <pose relative_to='__model__'>0 0 0 0 -0 0</pose>
-        <parent>world</parent>
-        <child>link_base</child>
-      </joint>
-      <link name='link_base'>
-        <pose relative_to='world_joint'>0 0 0 0 -0 0</pose>
-        <inertial>
-          <pose>0 0 0.09103 0 -0 0</pose>
-          <mass>2.7</mass>
-          <inertia>
-            <ixx>0.00494875</ixx>
-            <ixy>-3.5e-06</ixy>
-            <ixz>1.25e-05</ixz>
-            <iyy>0.00494174</iyy>
-            <iyz>1.67e-06</iyz>
-            <izz>0.002219</izz>
-          </inertia>
-        </inertial>
-        <collision name='link_base_collision'>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <mesh>
-              <scale>1 1 1</scale>
-              <uri>/home/sjo/xarm_ws/src/xarm_ros/xarm_description/meshes/xarm6/visual/base.stl</uri>
-            </mesh>
-          </geometry>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <friction>
-              <ode/>
-              <torsional>
-                <ode/>
-              </torsional>
-            </friction>
-            <bounce/>
-          </surface>
-          <max_contacts>10</max_contacts>
-        </collision>
-        <visual name='link_base_visual'>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <mesh>
-              <scale>1 1 1</scale>
-              <uri>/home/sjo/xarm_ws/src/xarm_ros/xarm_description/meshes/xarm6/visual/base.stl</uri>
-            </mesh>
-          </geometry>
-        </visual>
-        <self_collide>1</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-      </link>
-      <joint name='joint1' type='revolute'>
-        <pose relative_to='link_base'>0 0 0.267 0 -0 0</pose>
-        <parent>link_base</parent>
-        <child>link1</child>
-        <axis>
-          <xyz>0 0 1</xyz>
-          <limit>
-            <lower>-6.28319</lower>
-            <upper>6.28319</upper>
-            <effort>50</effort>
-            <velocity>3.14</velocity>
-          </limit>
-          <dynamics>
-            <damping>1</damping>
-            <friction>1</friction>
-            <spring_reference>0</spring_reference>
-            <spring_stiffness>0</spring_stiffness>
-          </dynamics>
-        </axis>
-      </joint>
-      <link name='link1'>
-        <pose relative_to='joint1'>0 0 0 0 -0 0</pose>
-        <inertial>
-          <pose>0.00022 0.02951 -0.0124 0 -0 0</pose>
-          <mass>2.3814</mass>
-          <inertia>
-            <ixx>0.0058562</ixx>
-            <ixy>-1.79e-05</ixy>
-            <ixz>3.55e-06</ixz>
-            <iyy>0.0050316</iyy>
-            <iyz>-0.000888336</iyz>
-            <izz>0.00353665</izz>
-          </inertia>
-        </inertial>
-        <collision name='link1_collision'>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <mesh>
-              <scale>1 1 1</scale>
-              <uri>/home/sjo/xarm_ws/src/xarm_ros/xarm_description/meshes/xarm6/visual/link1.stl</uri>
-            </mesh>
-          </geometry>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <friction>
-              <ode/>
-              <torsional>
-                <ode/>
-              </torsional>
-            </friction>
-            <bounce/>
-          </surface>
-          <max_contacts>10</max_contacts>
-        </collision>
-        <visual name='link1_visual'>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <mesh>
-              <scale>1 1 1</scale>
-              <uri>/home/sjo/xarm_ws/src/xarm_ros/xarm_description/meshes/xarm6/visual/link1.stl</uri>
-            </mesh>
-          </geometry>
-        </visual>
-        <self_collide>1</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-      </link>
-      <joint name='joint2' type='revolute'>
-        <pose relative_to='link1'>0 0 0 -1.5708 0 0</pose>
-        <parent>link1</parent>
-        <child>link2</child>
-        <axis>
-          <xyz>0 0 1</xyz>
-          <limit>
-            <lower>-2.059</lower>
-            <upper>2.0944</upper>
-            <effort>50</effort>
-            <velocity>3.14</velocity>
-          </limit>
-          <dynamics>
-            <damping>1</damping>
-            <friction>1</friction>
-            <spring_reference>0</spring_reference>
-            <spring_stiffness>0</spring_stiffness>
-          </dynamics>
-        </axis>
-      </joint>
-      <link name='link2'>
-        <pose relative_to='joint2'>0 0 0 0 -0 0</pose>
-        <inertial>
-          <pose>0.03881 -0.22783 0.03496 0 -0 0</pose>
-          <mass>2.2675</mass>
-          <inertia>
-            <ixx>0.0283158</ixx>
-            <ixy>0.005</ixy>
-            <ixz>0.00066546</ixz>
-            <iyy>0.0058</iyy>
-            <iyz>-0.0045741</iyz>
-            <izz>0.0273447</izz>
-          </inertia>
-        </inertial>
-        <collision name='link2_collision'>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <mesh>
-              <scale>1 1 1</scale>
-              <uri>/home/sjo/xarm_ws/src/xarm_ros/xarm_description/meshes/xarm6/visual/link2.stl</uri>
-            </mesh>
-          </geometry>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <friction>
-              <ode/>
-              <torsional>
-                <ode/>
-              </torsional>
-            </friction>
-            <bounce/>
-          </surface>
-          <max_contacts>10</max_contacts>
-        </collision>
-        <visual name='link2_visual'>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <mesh>
-              <scale>1 1 1</scale>
-              <uri>/home/sjo/xarm_ws/src/xarm_ros/xarm_description/meshes/xarm6/visual/link2.stl</uri>
-            </mesh>
-          </geometry>
-        </visual>
-        <self_collide>1</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-      </link>
-      <joint name='joint3' type='revolute'>
-        <pose relative_to='link2'>0.0535 -0.2845 0 0 -0 0</pose>
-        <parent>link2</parent>
-        <child>link3</child>
-        <axis>
-          <xyz>0 0 1</xyz>
-          <limit>
-            <lower>-3.927</lower>
-            <upper>0.19198</upper>
-            <effort>32</effort>
-            <velocity>3.14</velocity>
-          </limit>
-          <dynamics>
-            <damping>1</damping>
-            <friction>1</friction>
-            <spring_reference>0</spring_reference>
-            <spring_stiffness>0</spring_stiffness>
-          </dynamics>
-        </axis>
-      </joint>
-      <link name='link3'>
-        <pose relative_to='joint3'>0 0 0 0 -0 0</pose>
-        <inertial>
-          <pose>0.07041 0.11631 0.0107 0 -0 0</pose>
-          <mass>1.875</mass>
-          <inertia>
-            <ixx>0.0063483</ixx>
-            <ixy>-0.0015397</ixy>
-            <ixz>0.00096858</ixz>
-            <iyy>0.00379758</iyy>
-            <iyz>0.00186567</iyz>
-            <izz>0.00595768</izz>
-          </inertia>
-        </inertial>
-        <collision name='link3_collision'>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <mesh>
-              <scale>1 1 1</scale>
-              <uri>/home/sjo/xarm_ws/src/xarm_ros/xarm_description/meshes/xarm6/visual/link3.stl</uri>
-            </mesh>
-          </geometry>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <friction>
-              <ode/>
-              <torsional>
-                <ode/>
-              </torsional>
-            </friction>
-            <bounce/>
-          </surface>
-          <max_contacts>10</max_contacts>
-        </collision>
-        <visual name='link3_visual'>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <mesh>
-              <scale>1 1 1</scale>
-              <uri>/home/sjo/xarm_ws/src/xarm_ros/xarm_description/meshes/xarm6/visual/link3.stl</uri>
-            </mesh>
-          </geometry>
-        </visual>
-        <self_collide>1</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-      </link>
-      <joint name='joint4' type='revolute'>
-        <pose relative_to='link3'>0.0775 0.3425 0 -1.5708 0 0</pose>
-        <parent>link3</parent>
-        <child>link4</child>
-        <axis>
-          <xyz>0 0 1</xyz>
-          <limit>
-            <lower>-6.28319</lower>
-            <upper>6.28319</upper>
-            <effort>32</effort>
-            <velocity>3.14</velocity>
-          </limit>
-          <dynamics>
-            <damping>1</damping>
-            <friction>1</friction>
-            <spring_reference>0</spring_reference>
-            <spring_stiffness>0</spring_stiffness>
-          </dynamics>
-        </axis>
-      </joint>
-      <link name='link4'>
-        <pose relative_to='joint4'>0 0 0 0 -0 0</pose>
-        <inertial>
-          <pose>-0.00018 0.01798 -0.02291 0 -0 0</pose>
-          <mass>1.3192</mass>
-          <inertia>
-            <ixx>0.004896</ixx>
-            <ixy>-6.925e-06</ixy>
-            <ixz>-1.418e-05</ixz>
-            <iyy>0.00445694</iyy>
-            <iyz>-0.00023186</iyz>
-            <izz>0.00134332</izz>
-          </inertia>
-        </inertial>
-        <collision name='link4_collision'>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <mesh>
-              <scale>1 1 1</scale>
-              <uri>/home/sjo/xarm_ws/src/xarm_ros/xarm_description/meshes/xarm6/visual/link4.stl</uri>
-            </mesh>
-          </geometry>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <friction>
-              <ode/>
-              <torsional>
-                <ode/>
-              </torsional>
-            </friction>
-            <bounce/>
-          </surface>
-          <max_contacts>10</max_contacts>
-        </collision>
-        <visual name='link4_visual'>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <mesh>
-              <scale>1 1 1</scale>
-              <uri>/home/sjo/xarm_ws/src/xarm_ros/xarm_description/meshes/xarm6/visual/link4.stl</uri>
-            </mesh>
-          </geometry>
-        </visual>
-        <self_collide>1</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-      </link>
-      <joint name='joint5' type='revolute'>
-        <pose relative_to='link4'>0 0 0 1.5708 -0 0</pose>
-        <parent>link4</parent>
-        <child>link5</child>
-        <axis>
-          <xyz>0 0 1</xyz>
-          <limit>
-            <lower>-1.69297</lower>
-            <upper>3.14159</upper>
-            <effort>32</effort>
-            <velocity>3.14</velocity>
-          </limit>
-          <dynamics>
-            <damping>1</damping>
-            <friction>1</friction>
-            <spring_reference>0</spring_reference>
-            <spring_stiffness>0</spring_stiffness>
-          </dynamics>
-        </axis>
-      </joint>
-      <link name='link5'>
-        <pose relative_to='joint5'>0 0 0 0 -0 0</pose>
-        <inertial>
-          <pose>0.0651 0.03096 0.00315 0 -0 0</pose>
-          <mass>1.33854</mass>
-          <inertia>
-            <ixx>0.00146378</ixx>
-            <ixy>-0.000450624</ixy>
-            <ixz>0.000284306</ixz>
-            <iyy>0.00184192</iyy>
-            <iyz>0.000130866</iyz>
-            <izz>0.00233352</izz>
-          </inertia>
-        </inertial>
-        <collision name='link5_collision'>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <mesh>
-              <scale>1 1 1</scale>
-              <uri>/home/sjo/xarm_ws/src/xarm_ros/xarm_description/meshes/xarm6/visual/link5.stl</uri>
-            </mesh>
-          </geometry>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <friction>
-              <ode/>
-              <torsional>
-                <ode/>
-              </torsional>
-            </friction>
-            <bounce/>
-          </surface>
-          <max_contacts>10</max_contacts>
-        </collision>
-        <visual name='link5_visual'>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <mesh>
-              <scale>1 1 1</scale>
-              <uri>/home/sjo/xarm_ws/src/xarm_ros/xarm_description/meshes/xarm6/visual/link5.stl</uri>
-            </mesh>
-          </geometry>
-        </visual>
-        <self_collide>1</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-      </link>
-      <joint name='joint6' type='revolute'>
-        <pose relative_to='link5'>0.076 0.097 0 -1.5708 0 0</pose>
-        <parent>link5</parent>
-        <child>link6</child>
-        <axis>
-          <xyz>0 0 1</xyz>
-          <limit>
-            <lower>-6.28319</lower>
-            <upper>6.28319</upper>
-            <effort>20</effort>
-            <velocity>3.14</velocity>
-          </limit>
-          <dynamics>
-            <damping>1</damping>
-            <friction>1</friction>
-            <spring_reference>0</spring_reference>
-            <spring_stiffness>0</spring_stiffness>
-          </dynamics>
-        </axis>
-      </joint>
-      <link name='link6'>
-        <pose relative_to='joint6'>0 0 0 0 -0 0</pose>
-        <inertial>
-          <pose>0 -0.006773 -0.010977 0 -0 0</pose>
-          <mass>0.17001</mass>
-          <inertia>
-            <ixx>9.40543e-05</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>5.9726e-05</iyy>
-            <iyz>-3.57286e-06</iyz>
-            <izz>0.000133028</izz>
-          </inertia>
-        </inertial>
-        <collision name='link6_collision'>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <mesh>
-              <scale>1 1 1</scale>
-              <uri>/home/sjo/xarm_ws/src/xarm_ros/xarm_description/meshes/end_tool/collision/end_tool.STL</uri>
-            </mesh>
-          </geometry>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <friction>
-              <ode/>
-              <torsional>
-                <ode/>
-              </torsional>
-            </friction>
-            <bounce/>
-          </surface>
-          <max_contacts>10</max_contacts>
-        </collision>
-        <collision name='link6_fixed_joint_lump__box_link_collision_1'>
-          <pose>0 0 0.04 0 -0 0</pose>
-          <geometry>
-            <box>
-              <size>0.08 0.08 0.08</size>
-            </box>
-          </geometry>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <friction>
-              <ode/>
-              <torsional>
-                <ode/>
-              </torsional>
-            </friction>
-            <bounce/>
-          </surface>
-          <max_contacts>10</max_contacts>
-        </collision>
-        <collision name='link6_fixed_joint_lump__hokuyo_link_collision_2'>
-          <pose>0 -0.075 0.04 1.5708 -0 0</pose>
-          <geometry>
-            <cylinder>
-              <length>0.03</length>
-              <radius>0.04</radius>
-            </cylinder>
-          </geometry>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <friction>
-              <ode/>
-              <torsional>
-                <ode/>
-              </torsional>
-            </friction>
-            <bounce/>
-          </surface>
-          <max_contacts>10</max_contacts>
-        </collision>
-        <visual name='link6_visual'>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <mesh>
-              <scale>1 1 1</scale>
-              <uri>/home/sjo/xarm_ws/src/xarm_ros/xarm_description/meshes/xarm6/visual/link6.stl</uri>
-            </mesh>
-          </geometry>
-        </visual>
-        <visual name='link6_fixed_joint_lump__box_link_visual_1'>
-          <pose>0 0 0.04 0 -0 0</pose>
-          <geometry>
-            <box>
-              <size>0.08 0.08 0.08</size>
-            </box>
-          </geometry>
-        </visual>
-        <visual name='link6_fixed_joint_lump__hokuyo_link_visual_2'>
-          <pose>0 -0.055 0.04 1.5708 -0 0</pose>
-          <geometry>
-            <cylinder>
-              <length>0.03</length>
-              <radius>0.04</radius>
-            </cylinder>
-          </geometry>
-        </visual>
-        <self_collide>1</self_collide>
-        <sensor name='head_hokuyo_sensor' type='ray'>
-          <visualize>1</visualize>
-          <update_rate>100</update_rate>
-          <ray>
-            <scan>
-              <horizontal>
-                <samples>750</samples>
-                <resolution>1</resolution>
-                <min_angle>-3.14</min_angle>
-                <max_angle>3.14</max_angle>
-              </horizontal>
-              <vertical>
-                <samples>1</samples>
-                <min_angle>0</min_angle>
-                <max_angle>0</max_angle>
-              </vertical>
-            </scan>
-            <range>
-              <min>0.1</min>
-              <max>10</max>
-              <resolution>0.1</resolution>
-            </range>
-            <noise>
-              <type>gaussian</type>
-              <mean>0</mean>
-              <stddev>0.01</stddev>
-            </noise>
-          </ray>
-          <plugin name='gazebo_ros_head_hokuyo_controller' filename='libgazebo_ros_laser.so'>
-            <topicName>/rrbot/laser/scan</topicName>
-            <frameName>hokuyo_link</frameName>
-            <robotNamespace>/</robotNamespace>
-          </plugin>
-          <pose>0 -0.06 0.04 1.5708 -0 0</pose>
-        </sensor>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-      </link>
-      <static>0</static>
-      <plugin name='gazebo_ros_control' filename='libgazebo_ros_control.so'>
-        <robotNamespace>/xarm</robotNamespace>
-        <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
-        <legacyModeNS>1</legacyModeNS>
-      </plugin>
-      <pose>-0.2 -0.5 1.021 0 -0 1.571</pose>
-    </model>
-    <model name='unit_box'>
-      <link name='link_1'>
-        <inertial>
-          <mass>1</mass>
-          <inertia>
-            <ixx>0.166667</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>0.166667</iyy>
-            <iyz>0</iyz>
-            <izz>0.166667</izz>
-          </inertia>
-          <pose>0 0 0 0 -0 0</pose>
-        </inertial>
-        <pose>-1.00521 -2.45248 -0 0 -0 0</pose>
-        <self_collide>0</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-        <gravity>1</gravity>
-        <visual name='visual'>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <mesh>
-              <uri>/home/sjo/pipe.dae</uri>
-              <scale>1 1 1</scale>
-            </mesh>
-          </geometry>
-          <material>
-            <lighting>1</lighting>
-            <script>
-              <uri>file://media/materials/scripts/gazebo.material</uri>
-              <name>Gazebo/Grey</name>
-            </script>
-            <shader type='pixel'>
-              <normal_map>__default__</normal_map>
-            </shader>
-          </material>
-          <transparency>0</transparency>
-          <cast_shadows>1</cast_shadows>
-        </visual>
-        <collision name='collision'>
-          <laser_retro>0.2</laser_retro>
-          <max_contacts>10</max_contacts>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <mesh>
-              <uri>/home/sjo/pipe.dae</uri>
-              <scale>1 1 1</scale>
-            </mesh>
-          </geometry>
-          <surface>
-            <friction>
-              <ode>
-                <mu>1</mu>
-                <mu2>1</mu2>
-                <fdir1>0 0 0</fdir1>
-                <slip1>0</slip1>
-                <slip2>0</slip2>
-              </ode>
-              <torsional>
-                <coefficient>1</coefficient>
-                <patch_radius>0</patch_radius>
-                <surface_radius>0</surface_radius>
-                <use_patch_radius>1</use_patch_radius>
-                <ode>
-                  <slip>0</slip>
-                </ode>
-              </torsional>
-            </friction>
-            <bounce>
-              <restitution_coefficient>0</restitution_coefficient>
-              <threshold>1e+06</threshold>
-            </bounce>
-            <contact>
-              <collide_without_contact>0</collide_without_contact>
-              <collide_without_contact_bitmask>1</collide_without_contact_bitmask>
-              <collide_bitmask>1</collide_bitmask>
-              <ode>
-                <soft_cfm>0</soft_cfm>
-                <soft_erp>0.2</soft_erp>
-                <kp>1e+13</kp>
-                <kd>1</kd>
-                <max_vel>0.01</max_vel>
-                <min_depth>0</min_depth>
-              </ode>
-              <bullet>
-                <split_impulse>1</split_impulse>
-                <split_impulse_penetration_threshold>-0.01</split_impulse_penetration_threshold>
-                <soft_cfm>0</soft_cfm>
-                <soft_erp>0.2</soft_erp>
-                <kp>1e+13</kp>
-                <kd>1</kd>
-              </bullet>
-            </contact>
-          </surface>
-        </collision>
-      </link>
-      <static>0</static>
-      <allow_auto_disable>1</allow_auto_disable>
-      <pose>-0.087398 3.49203 0 0 -0 0</pose>
+      <pose>0.563468 -0.179536 0 0 -0 0</pose>
     </model>
     <state world_name='default'>
-      <sim_time>49 372000000</sim_time>
-      <real_time>51 257281368</real_time>
-      <wall_time>1692515468 386200732</wall_time>
-      <iterations>49372</iterations>
+      <sim_time>166 31000000</sim_time>
+      <real_time>166 245416287</real_time>
+      <wall_time>1694645123 108327718</wall_time>
+      <iterations>166031</iterations>
+      <model name='D200pipe'>
+        <pose>0.602209 -0.001381 0.099603 0 0.000244 1.56997</pose>
+        <scale>1 1 1</scale>
+        <link name='link_0'>
+          <pose>0.602209 -0.001381 0.099603 0 0.000244 1.56997</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0.015287 8.36613 -0.000299 -1.87741 0.064544 -0.003392</acceleration>
+          <wrench>0.015287 8.36613 -0.000299 0 -0 0</wrench>
+        </link>
+      </model>
       <model name='ground_plane'>
         <pose>0 0 0 0 -0 0</pose>
         <scale>1 1 1</scale>
-        <link name='link'>
+        <link name='link___'>
           <pose>0 0 0 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
@@ -971,69 +407,13 @@
         </link>
       </model>
       <model name='table'>
-        <pose>0 -0.84 0 0 -0 0</pose>
+        <pose>0.6 0 0 0 -0 0</pose>
         <scale>1 1 1</scale>
-        <link name='link'>
-          <pose>0 -0.84 0 0 -0 0</pose>
+        <link name='link____'>
+          <pose>0.6 0 0 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='unit_box'>
-        <pose>-0.087398 3.49203 1.9e-05 1e-05 -5e-06 0</pose>
-        <scale>1 1 1</scale>
-        <link name='link_1'>
-          <pose>-1.09261 1.03955 -9e-06 1e-05 -5e-06 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>-4e-06 -0 -9.56468 3.06802 -0.195929 3.14159</acceleration>
-          <wrench>-4e-06 -0 -9.56468 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='xarm6'>
-        <pose>-0.2 -0.499999 1.021 -1e-06 -1.4e-05 1.571</pose>
-        <scale>1 1 1</scale>
-        <link name='link1'>
-          <pose>-0.2 -0.500003 1.288 3e-06 2.2e-05 1.57102</pose>
-          <velocity>-0 0 0 -0 -0 -0.000105</velocity>
-          <acceleration>-3.2e-05 3e-05 2e-06 0.459258 0.059576 -0.54474</acceleration>
-          <wrench>-7.5e-05 7.2e-05 5e-06 0 -0 0</wrench>
-        </link>
-        <link name='link2'>
-          <pose>-0.2 -0.5 1.288 -1.57079 0.001077 1.57103</pose>
-          <velocity>-0 0 0 -0.008247 -2e-06 -0.000105</velocity>
-          <acceleration>5e-05 -2.7e-05 1.3e-05 -0.524835 -0.478001 -2.49242</acceleration>
-          <wrench>0.000114 -6.2e-05 2.8e-05 0 -0 0</wrench>
-        </link>
-        <link name='link3'>
-          <pose>-0.200011 -0.446196 1.57244 -1.57078 0.001068 1.57102</pose>
-          <velocity>5e-06 0.002346 -0.000444 -0.007943 -2e-06 -0.000105</velocity>
-          <acceleration>4e-05 -9e-06 5.4e-05 0.263764 0.039934 -0.534055</acceleration>
-          <wrench>7.5e-05 -1.8e-05 0.000101 0 -0 0</wrench>
-        </link>
-        <link name='link4'>
-          <pose>-0.200034 -0.369063 1.22986 -3.14158 0.001081 1.57122</pose>
-          <velocity>1.4e-05 -0.000376 -0.001056 -0.007943 -0 0.001378</velocity>
-          <acceleration>-8e-06 3.2e-05 6.9e-05 -0.048341 -0.053361 -0.010956</acceleration>
-          <wrench>-1.1e-05 4.2e-05 9e-05 0 -0 0</wrench>
-        </link>
-        <link name='link5'>
-          <pose>-0.200034 -0.369063 1.22986 -1.57077 0.00117 1.57122</pose>
-          <velocity>1.4e-05 -0.000376 -0.001056 -0.008682 -1e-06 0.001378</velocity>
-          <acceleration>-2.4e-05 5e-05 9.5e-05 0.137613 0.03879 -0.019265</acceleration>
-          <wrench>-3.2e-05 6.7e-05 0.000127 0 -0 0</wrench>
-        </link>
-        <link name='link6'>
-          <pose>-0.200069 -0.293177 1.13277 -3.14157 0.001173 1.57122</pose>
-          <velocity>-9.1e-05 -0.001218 -0.001715 -0.008682 -1e-06 0.001364</velocity>
-          <acceleration>-3.8e-05 6.8e-05 0.000102 0.010521 0.004296 -0.000468</acceleration>
-          <wrench>-6e-06 1.1e-05 1.7e-05 0 -0 0</wrench>
-        </link>
-        <link name='link_base'>
-          <pose>-0.2 -0.499999 1.021 -1e-06 -1.4e-05 1.571</pose>
-          <velocity>0 0 -0 0 -0 0</velocity>
-          <acceleration>-0 -0 -1e-06 7.2e-05 -0.000232 1.1e-05</acceleration>
-          <wrench>-0 -0 -2e-06 0 -0 0</wrench>
         </link>
       </model>
       <light name='sun'>

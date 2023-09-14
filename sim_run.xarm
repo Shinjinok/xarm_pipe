@@ -1,6 +1,6 @@
 #!/bin/bash
 
-roslaunch xarm6_sim.launch |
+roslaunch sim_xarm6_pipe.launch |
 ./laser_assembler_service_caller
 
 

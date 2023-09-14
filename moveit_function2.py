@@ -53,6 +53,7 @@ import moveit_msgs.msg
 import geometry_msgs.msg
 import numpy as np
 
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
 try:
     from math import pi, tau, dist, fabs, cos
 except:  # For Python 2 compatibility
@@ -127,8 +128,10 @@ class MoveGroupPythonInterfaceTutorial(object):
         ## If you are using a different robot, change this value to the name of your robot
         ## arm planning group.
         ## This interface can be used to plan and execute motions:
-        group_name = "xarm6"
-        move_group = moveit_commander.MoveGroupCommander(group_name)
+        group_name_L = "L_xarm6"
+        move_group_L = moveit_commander.MoveGroupCommander(group_name_L)
+        group_name_R = "R_xarm6"
+        move_group_R = moveit_commander.MoveGroupCommander(group_name_R)
 
         ## Create a `DisplayTrajectory`_ ROS publisher which is used to display
         ## trajectories in Rviz:
@@ -145,11 +148,11 @@ class MoveGroupPythonInterfaceTutorial(object):
         ## Getting Basic Information
         ## ^^^^^^^^^^^^^^^^^^^^^^^^^
         # We can get the name of the reference frame for this robot:
-        planning_frame = move_group.get_planning_frame()
+        planning_frame = move_group_L.get_planning_frame()
         print("============ Planning frame: %s" % planning_frame)
 
         # We can also print the name of the end-effector link for this group:
-        eef_link = move_group.get_end_effector_link()
+        eef_link = move_group_L.get_end_effector_link()
         print("============ End effector link: %s" % eef_link)
 
         # We can get a list of all the groups in the robot:
@@ -167,7 +170,8 @@ class MoveGroupPythonInterfaceTutorial(object):
         self.box_name = ""
         self.robot = robot
         self.scene = scene
-        self.move_group = move_group
+        self.move_group_L = move_group_L
+        self.move_group_R = move_group_R
         self.display_trajectory_publisher = display_trajectory_publisher
         self.planning_frame = planning_frame
         self.eef_link = eef_link
@@ -182,11 +186,16 @@ class MoveGroupPythonInterfaceTutorial(object):
 
         return [qw, qx, qy, qz]
     
-    def go_to_joint_state(self,j1,j2,j3,j4,j5,j6,speed_factor):
+    def go_to_joint_state(self,mvg,joint,speed_factor):
         # Copy class variables to local variables to make the web tutorials more clear.
         # In practice, you should use the class variables directly unless you have a good
         # reason not to.
-        move_group = self.move_group
+        if mvg == "L_xarm6":
+            move_group = self.move_group_L
+        elif mvg == "R_xarm6":
+            move_group = self.move_group_R
+        else:
+            return
 
         ## BEGIN_SUB_TUTORIAL plan_to_joint_state
         ##
@@ -196,12 +205,7 @@ class MoveGroupPythonInterfaceTutorial(object):
         ## thing we want to do is move it to a slightly better configuration.
         # We can get the joint values from the group and adjust some of the values:
         joint_goal = move_group.get_current_joint_values()
-        joint_goal[0] = j1
-        joint_goal[1] = j2
-        joint_goal[2] = j3
-        joint_goal[3] = j4
-        joint_goal[4] = j5
-        joint_goal[5] = j6
+        joint_goal = joint
         move_group.set_max_velocity_scaling_factor(speed_factor)	
 
         # The go command can be called with joint values, poses, or without any
@@ -216,14 +220,19 @@ class MoveGroupPythonInterfaceTutorial(object):
         # For testing:
         # Note that since this section of code will not be included in the tutorials
         # we use the class variable rather than the copied state variable
-        current_joints = self.move_group.get_current_joint_values()
+        current_joints = move_group.get_current_joint_values()
         return all_close(joint_goal, current_joints, 0.01)
 
-    def go_to_pose_goal(self, pos, speed_factor):
+    def go_to_pose_goal(self, mvg, pos, speed_factor):
         # Copy class variables to local variables to make the web tutorials more clear.
         # In practice, you should use the class variables directly unless you have a good
         # reason not to.
-        move_group = self.move_group
+        if mvg == "L_xarm6":
+            move_group = self.move_group_L
+        elif mvg == "R_xarm6":
+            move_group = self.move_group_R
+        else:
+            return
 
         ## BEGIN_SUB_TUTORIAL plan_to_pose
         ##
@@ -231,8 +240,10 @@ class MoveGroupPythonInterfaceTutorial(object):
         ## ^^^^^^^^^^^^^^^^^^^^^^^
         ## We can plan a motion for this group to a desired pose for the
         ## end-effector:
-        pose_goal = geometry_msgs.msg.Pose()
-        qt = self.euler_to_quaternion(pos[3],pos[4],pos[5])
+        pose_goal = move_group.get_current_pose().pose
+        
+        qt = quaternion_from_euler(pos[3],pos[4],pos[5])
+        print("qt:",qt)
         pose_goal.orientation.x = qt[0]
         pose_goal.orientation.y = qt[1]
         pose_goal.orientation.z = qt[2]
@@ -240,7 +251,8 @@ class MoveGroupPythonInterfaceTutorial(object):
         pose_goal.position.x = pos[0]
         pose_goal.position.y = pos[1]
         pose_goal.position.z = pos[2]
-        move_group.set_max_velocity_scaling_factor(speed_factor)	
+        #move_group.set_max_velocity_scaling_factor(speed_factor)
+        print(pose_goal)	
 
         move_group.set_pose_target(pose_goal)
 
@@ -258,14 +270,19 @@ class MoveGroupPythonInterfaceTutorial(object):
         # For testing:
         # Note that since this section of code will not be included in the tutorials
         # we use the class variable rather than the copied state variable
-        current_pose = self.move_group.get_current_pose().pose
+        current_pose = move_group.get_current_pose().pose
         return all_close(pose_goal, current_pose, 0.01)
 
-    def plan_cartesian_path(self, pos,speed_factor):
+    def plan_cartesian_path(self, mvg, pos,speed_factor):
         # Copy class variables to local variables to make the web tutorials more clear.
         # In practice, you should use the class variables directly unless you have a good
         # reason not to.
-        move_group = self.move_group
+        if mvg == "L_xarm6":
+            move_group = self.move_group_L
+        elif mvg == "R_xarm6":
+            move_group = self.move_group_R
+        else:
+            return
         
         ## BEGIN_SUB_TUTORIAL plan_cartesian_path
         ##
@@ -332,11 +349,16 @@ class MoveGroupPythonInterfaceTutorial(object):
 
         ## END_SUB_TUTORIAL
 
-    def execute_plan(self, plan):
+    def execute_plan(self, plan,mvg):
         # Copy class variables to local variables to make the web tutorials more clear.
         # In practice, you should use the class variables directly unless you have a good
         # reason not to.
-        move_group = self.move_group
+        if mvg == "L_xarm6":
+            move_group = self.move_group_L
+        elif mvg == "R_xarm6":
+            move_group = self.move_group_R
+        else:
+            return
 
         ## BEGIN_SUB_TUTORIAL execute_plan
         ##
