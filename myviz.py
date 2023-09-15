@@ -9,19 +9,15 @@
 Description: Move Joint
 """
 import sys
-import copy
 import rospy
-import moveit_commander
-import moveit_msgs.msg
-import geometry_msgs.msg
+
 from math import pi
-from std_msgs.msg import String
+
 from moveit_commander.conversions import pose_to_list
 import os
 import sys
-import time
-import math
-from geometry_msgs.msg import Pose, Point, Quaternion, Vector3, Polygon
+
+
 from tf import transformations # rotation_matrix(), concatenate_matrices()
 
 import moveit_function2
@@ -40,7 +36,7 @@ import open3d as o3d
 import ros_numpy #sudo apt-get install ros-noetic-ros-numpy
 from sensor_msgs.msg import PointCloud2
 from visualization_msgs.msg import Marker
-
+from geometry_msgs.msg import PointStamped
 import numpy as np #pip install numpy==1.20.3
 
 ## Next import all the Qt bindings into the current namespace, for
@@ -262,7 +258,8 @@ class MyViz( QWidget ):
         self.setLayout( layout )
 
         rospy.init_node("move_group_python_interface_tutorial", anonymous=True)
-        rospy.Subscriber('/cloud2', PointCloud2, self.callback)
+        rospy.Subscriber('/cloud2', PointCloud2, self.callback_point_cloud2)
+        rospy.point_pub = rospy.Subscriber('/clicked_point', PointStamped, self.callback_clicked_point)
         self.point_cloud = o3d.geometry.PointCloud()
         
 
@@ -325,9 +322,17 @@ class MyViz( QWidget ):
                 return
         print( "Did not find view named %s." % view_name )
 
-    def callback(self, ros_cloud):
+    def callback_point_cloud2(self, ros_cloud):
         self.point_cloud.points = o3d.utility.Vector3dVector(ros_numpy.point_cloud2
                                         .pointcloud2_to_xyz_array(ros_cloud))
+    def callback_clicked_point(self, msg):
+        point = PointStamped()
+        point.header.stamp = rospy.Time.now()
+        point.header.frame_id = "/map"
+        point.point.x = msg.point.x      
+        point.point.y = msg.point.y
+        point.point.z = msg.point.z
+        print("coordinates:x=%f y=%f" %(point.point.x, point.point.y))
  
 ## Start the Application
 ## ^^^^^^^^^^^^^^^^^^^^^
