@@ -25,7 +25,7 @@ from geometry_msgs.msg import Pose, Point, Quaternion, Vector3, Polygon
 from tf import transformations # rotation_matrix(), concatenate_matrices()
 
 import moveit_function2
-import test3dplot
+#import test3dplot
 import rospy
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
 
@@ -40,7 +40,9 @@ import open3d as o3d
 import ros_numpy #sudo apt-get install ros-noetic-ros-numpy
 from sensor_msgs.msg import PointCloud2
 from visualization_msgs.msg import Marker
-import numpy as np
+
+import numpy as np #pip install numpy==1.20.3
+
 ## Next import all the Qt bindings into the current namespace, for
 ## convenience.  This uses the "python_qt_binding" package which hides
 ## differences between PyQt and PySide, and works if at least one of
