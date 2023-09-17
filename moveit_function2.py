@@ -52,6 +52,7 @@ import moveit_commander
 import moveit_msgs.msg
 import geometry_msgs.msg
 import numpy as np
+from sensor_msgs.msg import PointCloud2
 
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 try:
@@ -68,6 +69,10 @@ except:  # For Python 2 compatibility
 from std_msgs.msg import String
 from moveit_commander.conversions import pose_to_list
 
+
+import open3d as o3d
+import rviz_tools
+import ros_numpy
 ## END_SUB_TUTORIAL
 
 
@@ -101,9 +106,10 @@ def all_close(goal, actual, tolerance):
     return True
 
 
+            
 class MoveGroupPythonInterfaceTutorial(object):
     """MoveGroupPythonInterfaceTutorial"""
-
+        
     def __init__(self):
         super(MoveGroupPythonInterfaceTutorial, self).__init__()
 
@@ -111,8 +117,9 @@ class MoveGroupPythonInterfaceTutorial(object):
         ##
         ## First initialize `moveit_commander`_ and a `rospy`_ node:
         moveit_commander.roscpp_initialize(sys.argv)
-        rospy.init_node("move_group_python_interface_tutorial", anonymous=True)
-
+        rospy.init_node("move_group_python_interface_tutorial", 
+                        anonymous=False, log_level=rospy.INFO, disable_signals=False)
+        
         ## Instantiate a `RobotCommander`_ object. Provides information such as the robot's
         ## kinematic model and the robot's current joint states
         robot = moveit_commander.RobotCommander()
@@ -214,6 +221,8 @@ class MoveGroupPythonInterfaceTutorial(object):
 
         # Calling ``stop()`` ensures that there is no residual movement
         move_group.stop()
+
+
 
         ## END_SUB_TUTORIAL
 
@@ -515,6 +524,7 @@ class MoveGroupPythonInterfaceTutorial(object):
         return self.wait_for_state_update(
             box_is_attached=False, box_is_known=False, timeout=timeout
         )
+
 
 def main():
     try:

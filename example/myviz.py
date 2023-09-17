@@ -20,7 +20,7 @@ import sys
 
 from tf import transformations # rotation_matrix(), concatenate_matrices()
 
-import moveit_function2
+import moveit_function as mf
 #import test3dplot
 import rospy
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
@@ -60,20 +60,27 @@ from multiprocessing import Process, Queue
 ## The MyViz class is the main container widget.
 from PyQt5.QtCore import QObject
 
+pcd2 = o3d.geometry.PointCloud()
+pcd3 = o3d.geometry.PointCloud()
+
+
+
 class Worker(QThread):
 
     def __init__(self):
         super().__init__()
+  
         self.markers = rviz_tools.RvizMarkers('world', 'visualization_marker')
-        self.tutorial = moveit_function2.MoveGroupPythonInterfaceTutorial()
+        self.tutorial = mf.MoveGroupPythonInterfaceTutorial()
         self.working = ""
         self.pos_goal = np.array([0.3,0,0.3,0,0,0])
-        self.pcd = o3d.geometry.PointCloud()
+        
         self.center = np.array([0.3, 0, 0.5])
 
     def run(self):
        
         if self.working == "home":
+            
             move_group = "L_xarm6"
             joint = np.array([0,0,0,0,-3.14/2,0])
             speed_factor = 1
@@ -95,6 +102,23 @@ class Worker(QThread):
             plan, fraction = self.tutorial.plan_cartesian_path(move_group,position,speed_factor)
             self.tutorial.execute_plan(plan,move_group)
             print( "Done")
+            #pcd2 = fp.get_flattened_pcds2(source=self.point_cloud,A=0,B=1,C=0,D=0,x0=0,y0=1000,z0=0)
+            print("Finding Cylinder ...")
+           
+            pcd3 = pcd2
+            center, normal, radius = fp.get_cylinder(pcd3, thresh=0.01, maxIteration=10000)
+            #self.pos_goal[0] = center[0]
+            #self.pos_goal[2] = center[2]
+            #self.targepoint = center
+            print("Cylinder Center pos: ", center)
+            for c in range(len(center)):
+                print("Cylinder Center pos: ", center[c] ," radius", radius[c])
+                P=fp.get_clylinder_pos(center[c],normal[c])
+                #publishCylinder(self, pose, color, height, radius, lifetime=None):
+                self.markers.publishCylinder(pose = P, color = [0,1,0,0.5] ,height= 0.2,
+                    radius = radius[c]*2, lifetime=0) # pose, color, height, radius, lifetime    
+                self.center = center[c]
+            print("Marker published")
 
         if self.working == "vscan":
             print( " Go to start position")
@@ -134,7 +158,7 @@ class Worker(QThread):
         if self.working == "marker":
             #pcd2 = fp.get_flattened_pcds2(source=self.point_cloud,A=0,B=1,C=0,D=0,x0=0,y0=1000,z0=0)
             print("Finding Cylinder ...")
-            center, normal, radius = fp.get_cylinder(self.pcd, thresh=0.01, maxIteration=10000)
+            center, normal, radius = fp.get_cylinder(pcd2, thresh=0.01, maxIteration=10000)
             #self.pos_goal[0] = center[0]
             #self.pos_goal[2] = center[2]
             #self.targepoint = center
@@ -185,7 +209,7 @@ class MyViz( QWidget ):
         ## VisualizationFrame reads its data from the config object.
         reader = rviz.YamlConfigReader()
         config = rviz.Config()
-        reader.readFile( config, "config.myviz" )
+        reader.readFile( config, "myviz.rviz")#"config.myviz" )
         self.frame.load( config )
 
         ## You can also store any other application data you like in
@@ -239,21 +263,26 @@ class MyViz( QWidget ):
         scanV_button.clicked.connect( self.onScanVButtonClick )
         h_layout.addWidget( scanV_button )
 
-        save_button = QPushButton( "Save PCD" )
-        save_button.clicked.connect( self.onSaveButtonClick )
-        h_layout.addWidget( save_button )
-
-        go_button = QPushButton( "Go Target" )
-        go_button.clicked.connect( self.onGoButtonClick )
-        h_layout.addWidget( go_button )
-        
         marker_button = QPushButton( "Marker" )
         marker_button.clicked.connect( self.onMarkerButtonClick )
         h_layout.addWidget( marker_button )
 
-        
-        
+        go_button = QPushButton( "Go Target" )
+        go_button.clicked.connect( self.onGoButtonClick )
+        h_layout.addWidget( go_button )
+
+        save_button = QPushButton( "Save PCD" )
+        save_button.clicked.connect( self.onSaveButtonClick )
+        h_layout.addWidget( save_button )
+
         layout.addLayout( h_layout )
+
+        layout2 = QVBoxLayout()
+        self.text_box = QTextEdit("log")
+        text_box = self.text_box
+        layout2.addWidget(self.text_box)
+        layout.addLayout( layout2 )       
+        
         
         self.setLayout( layout )
 
@@ -284,29 +313,33 @@ class MyViz( QWidget ):
     def onHomeButtonClick( self ):
         self.worker.start()
         self.worker.working = "home"
+        self.text_box.setText(self.worker.working)
         
     def onScanHButtonClick( self ):
         self.worker.start()
         self.worker.working = "hscan"
-
+        self.text_box.setText(self.worker.working)
     def onScanVButtonClick( self ):
         self.worker.start()
         self.worker.working = "vscan"
-
+        self.text_box.setText(self.worker.working)
     def onSaveButtonClick( self ):
-        o3d.io.write_point_cloud("point_pipe.pcd", self.point_cloud)
+        fname = "point_pipe.pcd"
+        #filename, pointcloud, write_ascii=False, compressed=False, print_progress=False)
+        o3d.io.write_point_cloud(filename=fname, pointcloud=pcd3)
+        self.text_box.setText(fname + " saved")
 
     def onGoButtonClick( self ):
         self.worker.start()
         self.worker.working = "go_target" 
         #self.worker.pos_goal = np.array([0, 0, 0, 0, 0, 0])  #x,y,z,roll,pitch,yaw 
-                
+        self.text_box.setText(self.worker.working)        
 
     def onMarkerButtonClick( self ):
         self.worker.start()
         self.worker.working = "marker"
         self.worker.pcd = self.point_cloud
-        
+        self.text_box.setText(self.worker.working)
            
     ## switchToView() works by looping over the views saved in the
     ## ViewManager and looking for one with a matching name.
@@ -323,7 +356,7 @@ class MyViz( QWidget ):
         print( "Did not find view named %s." % view_name )
 
     def callback_point_cloud2(self, ros_cloud):
-        self.point_cloud.points = o3d.utility.Vector3dVector(ros_numpy.point_cloud2
+        pcd2.points = o3d.utility.Vector3dVector(ros_numpy.point_cloud2
                                         .pointcloud2_to_xyz_array(ros_cloud))
     def callback_clicked_point(self, msg):
         point = PointStamped()

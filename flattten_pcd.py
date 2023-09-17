@@ -90,10 +90,7 @@ def get_cylinder(pcd,thresh=0.1,maxIteration=1000):
             normal.append(nor)
             radius.append(rad)
 
-    
-        
-    
-    
+
     return center, normal, radius
 
 def get_clylinder_mesh(center, normal, radius):
