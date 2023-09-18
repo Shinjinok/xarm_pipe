@@ -52,6 +52,7 @@ import moveit_commander
 import moveit_msgs.msg
 import geometry_msgs.msg
 import numpy as np
+import os
 
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 try:
@@ -107,11 +108,16 @@ class MoveGroupPythonInterfaceTutorial(object):
     def __init__(self):
         super(MoveGroupPythonInterfaceTutorial, self).__init__()
 
+        
+        #nodes = os.popen("rosnode list|grep move_group_python_interface_tutorial")
+        #for node in nodes:
+        #    os.system("rosnode kill "+node)
+
         ## BEGIN_SUB_TUTORIAL setup
         ##
         ## First initialize `moveit_commander`_ and a `rospy`_ node:
         moveit_commander.roscpp_initialize(sys.argv)
-        rospy.init_node("move_group_python_interface_tutorial", anonymous=True)
+        rospy.init_node("move_group_python_interface_tutorial", anonymous=False)
 
         ## Instantiate a `RobotCommander`_ object. Provides information such as the robot's
         ## kinematic model and the robot's current joint states

@@ -9,35 +9,17 @@
 Description: Move Joint
 """
 import sys
-import rospy
-
-from math import pi
-
 from moveit_commander.conversions import pose_to_list
 import os
 import sys
-
-
-from tf import transformations # rotation_matrix(), concatenate_matrices()
-
-
+import numpy as np
 #import test3dplot
 import rospy
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
 
-from xarm.wrapper import XArmAPI
-
 ## First we start with the standard ros Python import line:
 import roslib
 roslib.load_manifest('rviz_python_tutorial')
-
-
-
-import ros_numpy #sudo apt-get install ros-noetic-ros-numpy
-from sensor_msgs.msg import PointCloud2
-
-from geometry_msgs.msg import PointStamped
-import numpy as np #pip install numpy==1.20.3
 
 import pipe_scan_function as psf
 
@@ -55,10 +37,6 @@ except ImportError:
 
 ## Finally import the RViz bindings themselves.
 from rviz import bindings as rviz
-
-from multiprocessing import Process, Queue
-
-##rospy.init_node('marker', anonymous=True, log_level=rospy.INFO, disable_signals=False)
 ## The MyViz class is the main container widget.
 from PyQt5.QtCore import QObject
 
@@ -112,8 +90,8 @@ class MyViz( QWidget ):
         ## (from the bottom), and the "hide-docks" buttons, which are
         ## the tall skinny buttons on the left and right sides of the
         ## main render window.
-        self.frame.setMenuBar( None )
-        self.frame.setStatusBar( None )
+        #self.frame.setMenuBar( None )
+        #self.frame.setStatusBar( None )
         self.frame.setHideButtonVisibility( False )
 
         ## frame.getManager() returns the VisualizationManager
@@ -132,13 +110,13 @@ class MyViz( QWidget ):
         layout = QVBoxLayout()
         layout.addWidget( self.frame )
         
-        thickness_slider = QSlider( Qt.Horizontal )
+        """thickness_slider = QSlider( Qt.Horizontal )
         thickness_slider.setTracking( True )
         thickness_slider.setMinimum( 1 )
         thickness_slider.setMaximum( 180 )
         thickness_slider.setValue(90)
         thickness_slider.valueChanged.connect( self.onThicknessSliderChanged )
-        layout.addWidget( thickness_slider )
+        layout.addWidget( thickness_slider )"""
         
         h_layout = QHBoxLayout()
         
@@ -164,11 +142,31 @@ class MyViz( QWidget ):
 
         layout.addLayout( h_layout )
 
-        layout2 = QVBoxLayout()
-        self.text_box = QTextEdit("log")
-        text_box = self.text_box
-        layout2.addWidget(self.text_box)
-        layout.addLayout( layout2 )       
+        h_layout2 = QHBoxLayout()
+
+        roll_label = QLabel("Roll")
+        h_layout2.addWidget(roll_label)
+
+        self.roll_text_box = QTextEdit("0")
+        h_layout2.addWidget(self.roll_text_box)
+
+        pitch_label = QLabel("Pitch")
+        h_layout2.addWidget(pitch_label)
+
+        self.pitch_text_box = QTextEdit("0")
+        h_layout2.addWidget(self.pitch_text_box)
+
+        yaw_label = QLabel("Yaw")
+        h_layout2.addWidget(yaw_label)
+
+        self.yaw_text_box = QTextEdit("0")
+        h_layout2.addWidget(self.yaw_text_box)
+
+        go_rotation_button = QPushButton( "Go Rotation" )
+        go_rotation_button.clicked.connect( self.onGoRotationClick )
+        h_layout2.addWidget( go_rotation_button )
+
+        layout.addLayout( h_layout2 )       
         
         
         self.setLayout( layout )
@@ -187,29 +185,36 @@ class MyViz( QWidget ):
     ## have sub-properties, forming a tree.  To change a Property of a
     ## Display, use the subProp() function to walk down the tree to
     ## find the child you need.
-    def onThicknessSliderChanged( self, new_value ):
-        self.psf.change_angle_thread(new_value)
+    """def onThicknessSliderChanged( self, new_value ):
+        self.psf.change_angle_thread(new_value)"""
 
     ## The view buttons just call switchToView() with the name of a saved view.
     def onHomeButtonClick( self ):
         self.psf.command_thread("home")
-        self.text_box.setText("home")   
+        #self.text_box.setText("home")   
 
     def onScanHButtonClick( self ):
         self.psf.command_thread("hscan")
-        self.text_box.setText("hscan")   
+        #self.text_box.setText("hscan")   
 
     def onScanVButtonClick( self ):
         self.psf.command_thread("vscan")
-        self.text_box.setText("hscan")  
+        #self.text_box.setText("hscan")  
 
     def onSaveButtonClick( self ):
         self.psf.command_thread("savePCD")
-        self.text_box.setText("savePCD")  
+        #self.text_box.setText("savePCD")  
 
     def onGoButtonClick( self ):
         self.psf.command_thread("go_target")
-        self.text_box.setText("go_target")        
+        #self.text_box.setText("go_target")      
+    def onGoRotationClick( self ):
+        roll = float(self.roll_text_box.toPlainText())/180.*3.14159
+        pitch = float(self.pitch_text_box.toPlainText())/180.*3.14159
+        yaw = float(self.yaw_text_box.toPlainText())/180.*3.14159
+        new_value = np.array([roll,pitch,yaw])
+        print("set rotation :",pitch)
+        self.psf.change_angle_thread(pitch)
 
          
     ## switchToView() works by looping over the views saved in the

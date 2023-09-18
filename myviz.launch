@@ -1,0 +1,3 @@
+<launch>
+    <node name="my_rviz" type="myviz.py" />
+</launch>

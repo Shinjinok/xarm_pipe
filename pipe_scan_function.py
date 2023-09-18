@@ -38,33 +38,39 @@ class PipeScanFunction():
     def command_thread(self, msg):
         if msg == "home":
             t = threading.Thread(target = self.home)
+            t.daemon = True
             t.start() 
         if msg == "hscan":
             t = threading.Thread(target=self.hscan)
+            t.daemon = True
             t.start()
         if msg == "vscan":
             t = threading.Thread(target=self.vscan)
+            t.daemon = True
             t.start()
         if msg == "savePCD":
             t = threading.Thread(target=self.savePCD)
+            t.daemon = True
             t.start()
 
         if msg == "go_target":
             t = threading.Thread(target=self.go_target)
+            t.daemon = True
             t.start()
 
-    def change_angle_thread(self, deg):
-        self.deg = deg - 90
-        t = threading.Thread(target = self.change_deg)
+    def change_angle_thread(self, rpy):
+        
+        t = threading.Thread(target = self.change_deg, args=(rpy,))
+        t.daemon = True
         t.start()
 
-    def change_deg(self):
+    def change_deg(self, rpy):
         print( "Tcp Go to Cylinder Center Position")
-        self.pos_goal[0] = self.target_center[0] - 0.2*np.cos(self.deg/180*3.14)
+        self.pos_goal[0] = self.target_center[0] - 0.2*np.cos(rpy)
         self.pos_goal[1] = self.target_center[1]
-        self.pos_goal[2] = self.target_center[2] + 0.2*np.sin(self.deg/180*3.14)
+        self.pos_goal[2] = self.target_center[2] + 0.2*np.sin(rpy)
         self.pos_goal[3] = 0
-        self.pos_goal[4] = self.deg/180.*3.14
+        self.pos_goal[4] = rpy
         self.pos_goal[5] = 0
         move_group = "L_xarm6"
 
@@ -72,11 +78,11 @@ class PipeScanFunction():
         self.tutorial.go_to_pose_goal(move_group, self.pos_goal,0.5)
 
         print( "Pad Go to Cylinder Center Position")
-        self.pos_goal[0] = self.target_center[0] + 0.2*np.cos(self.deg/180*3.14)
+        self.pos_goal[0] = self.target_center[0] + 0.2*np.cos(rpy)
         self.pos_goal[1] = self.target_center[1]
-        self.pos_goal[2] = self.target_center[2] - 0.2*np.sin(self.deg/180*3.14)
+        self.pos_goal[2] = self.target_center[2] - 0.2*np.sin(rpy)
         self.pos_goal[3] = 0
-        self.pos_goal[4] = self.deg/180.*3.14
+        self.pos_goal[4] = rpy
         self.pos_goal[5] = 0
         move_group = "R_xarm6"
         print(self.pos_goal)
