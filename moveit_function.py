@@ -136,8 +136,8 @@ class MoveGroupPythonInterfaceTutorial(object):
         ## This interface can be used to plan and execute motions:
         group_name_L = "L_xarm6"
         move_group_L = moveit_commander.MoveGroupCommander(group_name_L)
-        group_name_R = "R_xarm6"
-        move_group_R = moveit_commander.MoveGroupCommander(group_name_R)
+       ## group_name_R = "R_xarm6"
+       ## move_group_R = moveit_commander.MoveGroupCommander(group_name_R)
 
         ## Create a `DisplayTrajectory`_ ROS publisher which is used to display
         ## trajectories in Rviz:
@@ -177,7 +177,7 @@ class MoveGroupPythonInterfaceTutorial(object):
         self.robot = robot
         self.scene = scene
         self.move_group_L = move_group_L
-        self.move_group_R = move_group_R
+        ##self.move_group_R = move_group_R
         self.display_trajectory_publisher = display_trajectory_publisher
         self.planning_frame = planning_frame
         self.eef_link = eef_link
@@ -199,8 +199,8 @@ class MoveGroupPythonInterfaceTutorial(object):
         if mvg == "L_xarm6":
             move_group = self.move_group_L
         elif mvg == "R_xarm6":
-            move_group = self.move_group_R
-        else:
+          ##  move_group = self.move_group_R
+       ## else:
             return
 
         ## BEGIN_SUB_TUTORIAL plan_to_joint_state
