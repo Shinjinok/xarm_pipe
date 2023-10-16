@@ -105,7 +105,7 @@ def all_close(goal, actual, tolerance):
 class MoveGroupPythonInterfaceTutorial(object):
     """MoveGroupPythonInterfaceTutorial"""
 
-    def __init__(self):
+    def __init__(self,dual):
         super(MoveGroupPythonInterfaceTutorial, self).__init__()
 
         
@@ -136,8 +136,11 @@ class MoveGroupPythonInterfaceTutorial(object):
         ## This interface can be used to plan and execute motions:
         group_name_L = "L_xarm6"
         move_group_L = moveit_commander.MoveGroupCommander(group_name_L)
-       ## group_name_R = "R_xarm6"
-       ## move_group_R = moveit_commander.MoveGroupCommander(group_name_R)
+        
+        self.dual= dual
+        if self.dual :
+            group_name_R = "R_xarm6"
+            move_group_R = moveit_commander.MoveGroupCommander(group_name_R)
 
         ## Create a `DisplayTrajectory`_ ROS publisher which is used to display
         ## trajectories in Rviz:
@@ -177,7 +180,8 @@ class MoveGroupPythonInterfaceTutorial(object):
         self.robot = robot
         self.scene = scene
         self.move_group_L = move_group_L
-        ##self.move_group_R = move_group_R
+        if self.dual :
+            self.move_group_R = move_group_R
         self.display_trajectory_publisher = display_trajectory_publisher
         self.planning_frame = planning_frame
         self.eef_link = eef_link
@@ -198,9 +202,9 @@ class MoveGroupPythonInterfaceTutorial(object):
         # reason not to.
         if mvg == "L_xarm6":
             move_group = self.move_group_L
-        elif mvg == "R_xarm6":
-          ##  move_group = self.move_group_R
-       ## else:
+        elif mvg == "R_xarm6" and self.dual:
+            move_group = self.move_group_R
+        else:
             return
 
         ## BEGIN_SUB_TUTORIAL plan_to_joint_state
@@ -237,7 +241,7 @@ class MoveGroupPythonInterfaceTutorial(object):
         # reason not to.
         if mvg == "L_xarm6":
             move_group = self.move_group_L
-        elif mvg == "R_xarm6":
+        elif mvg == "R_xarm6" and self.dual:
             move_group = self.move_group_R
         else:
             return
@@ -248,6 +252,7 @@ class MoveGroupPythonInterfaceTutorial(object):
         ## ^^^^^^^^^^^^^^^^^^^^^^^
         ## We can plan a motion for this group to a desired pose for the
         ## end-effector:
+        
         pose_goal = move_group.get_current_pose().pose
         
         qt = quaternion_from_euler(pos[3],pos[4],pos[5])
@@ -287,11 +292,10 @@ class MoveGroupPythonInterfaceTutorial(object):
         # reason not to.
         if mvg == "L_xarm6":
             move_group = self.move_group_L
-        elif mvg == "R_xarm6":
+        elif mvg == "R_xarm6" and self.dual:
             move_group = self.move_group_R
         else:
             return
-        
         ## BEGIN_SUB_TUTORIAL plan_cartesian_path
         ##
         ## Cartesian Paths
@@ -363,7 +367,7 @@ class MoveGroupPythonInterfaceTutorial(object):
         # reason not to.
         if mvg == "L_xarm6":
             move_group = self.move_group_L
-        elif mvg == "R_xarm6":
+        elif mvg == "R_xarm6" and self.dual:
             move_group = self.move_group_R
         else:
             return

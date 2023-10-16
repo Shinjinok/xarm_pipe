@@ -1,0 +1,14 @@
+dual arm gazebo simulator commands
+
+	roslaunch xarm_gazebo laser_dual_robot_beside_table.launch
+	roslaunch dual_xarm6_moveit_config laser_xarm6_moveit_gazebo.launch
+
+single arm realmoveit command
+	roslaunch xarm6_moveit_config realMove_exec.launch robot_ip:=192.168.0.100
+
+L arm dual
+
+	roslaunch dual_xarm6_moveit_config L_xarm_dual_realMove_exec.launch robot_ip_1:=192.168.0.100 show_rviz:=true
+
+source file github
+	git clone https://github.com/Shinjinok/xarm6_ros.git

@@ -110,6 +110,8 @@ class MyViz( QWidget ):
         layout = QVBoxLayout()
         layout.addWidget( self.frame )
         
+        
+        
         """thickness_slider = QSlider( Qt.Horizontal )
         thickness_slider.setTracking( True )
         thickness_slider.setMinimum( 1 )
@@ -144,23 +146,25 @@ class MyViz( QWidget ):
 
         h_layout2 = QHBoxLayout()
 
-        roll_label = QLabel("Roll")
-        h_layout2.addWidget(roll_label)
-
-        self.roll_text_box = QTextEdit("0")
-        h_layout2.addWidget(self.roll_text_box)
-
         pitch_label = QLabel("Pitch")
         h_layout2.addWidget(pitch_label)
 
-        self.pitch_text_box = QTextEdit("0")
+        self.pitch_text_box = QTextEdit("0.0")
         h_layout2.addWidget(self.pitch_text_box)
+        
+        L_dist_label = QLabel("L_dist(m)")
+        h_layout2.addWidget(L_dist_label)
 
-        yaw_label = QLabel("Yaw")
-        h_layout2.addWidget(yaw_label)
+        self.L_dist_text_box = QTextEdit("0.2")
+        h_layout2.addWidget(self.L_dist_text_box)
 
-        self.yaw_text_box = QTextEdit("0")
-        h_layout2.addWidget(self.yaw_text_box)
+        
+
+        R_dist_label = QLabel("R_dist(m)")
+        h_layout2.addWidget(R_dist_label)
+
+        self.R_dist_text_box = QTextEdit("0.2")
+        h_layout2.addWidget(self.R_dist_text_box)
 
         go_rotation_button = QPushButton( "Go Rotation" )
         go_rotation_button.clicked.connect( self.onGoRotationClick )
@@ -170,8 +174,9 @@ class MyViz( QWidget ):
         
         
         self.setLayout( layout )
-  
-        self.psf = psf.PipeScanFunction()
+        
+        dual = False
+        self.psf = psf.PipeScanFunction(dual)
         
     
   

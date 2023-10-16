@@ -16,11 +16,11 @@ import find_cylinder as fc
 
 class PipeScanFunction():
 
-    def __init__(self):
+    def __init__(self, dual):
         self.pcd2 = o3d.geometry.PointCloud()
         self.pcd3 = o3d.geometry.PointCloud()
 
-        self.tutorial = mf.MoveGroupPythonInterfaceTutorial()
+        self.tutorial = mf.MoveGroupPythonInterfaceTutorial(dual)
         self.markers = rviz_tools.RvizMarkers('world', 'visualization_marker')
         self.pos_goal = np.array([0.3,0,0.3,0,0,0])
         self.target_center = np.array([0.3, 0, 0.5])
@@ -34,6 +34,8 @@ class PipeScanFunction():
 
         self.fname = "point_pipe.pcd"
         self.fc = fc.FindCylinder()
+        self.dual = dual
+        print("Dual mode: ", dual)
 
     def command_thread(self, msg):
         if msg == "home":
@@ -66,6 +68,7 @@ class PipeScanFunction():
 
     def change_deg(self, rpy):
         print( "Tcp Go to Cylinder Center Position")
+
         self.pos_goal[0] = self.target_center[0] - 0.2*np.cos(rpy)
         self.pos_goal[1] = self.target_center[1]
         self.pos_goal[2] = self.target_center[2] + 0.2*np.sin(rpy)
@@ -76,26 +79,30 @@ class PipeScanFunction():
 
         print(self.pos_goal)
         self.tutorial.go_to_pose_goal(move_group, self.pos_goal,0.5)
-
-        print( "Pad Go to Cylinder Center Position")
-        self.pos_goal[0] = self.target_center[0] + 0.2*np.cos(rpy)
-        self.pos_goal[1] = self.target_center[1]
-        self.pos_goal[2] = self.target_center[2] - 0.2*np.sin(rpy)
-        self.pos_goal[3] = 0
-        self.pos_goal[4] = rpy
-        self.pos_goal[5] = 0
-        move_group = "R_xarm6"
-        print(self.pos_goal)
-        self.tutorial.go_to_pose_goal(move_group, self.pos_goal,0.5)
+        
+        if self.dual :
+            print( "Pad Go to Cylinder Center Position")
+            self.pos_goal[0] = self.target_center[0] + 0.2*np.cos(rpy)
+            self.pos_goal[1] = self.target_center[1]
+            self.pos_goal[2] = self.target_center[2] - 0.2*np.sin(rpy)
+            self.pos_goal[3] = 0
+            self.pos_goal[4] = rpy
+            self.pos_goal[5] = 0
+            move_group = "R_xarm6"
+            print(self.pos_goal)
+            self.tutorial.go_to_pose_goal(move_group, self.pos_goal,0.5)
             
     def home(self):
+        print("Left arm move home")
         move_group = "L_xarm6"
         joint = np.array([0,0,0,0,-3.14/2,0])
         speed_factor = 1
         self.tutorial.go_to_joint_state(move_group,joint,speed_factor)
-        move_group = "R_xarm6"
-        joint = np.array([0,-1,0,0,-3.14/2,0])
-        self.tutorial.go_to_joint_state(move_group,joint,speed_factor)
+        if self.dual == True :
+            print("Right arm move home")
+            move_group = "R_xarm6"
+            joint = np.array([0,-1,0,0,-3.14/2,0])
+            self.tutorial.go_to_joint_state(move_group,joint,speed_factor)
 
     def hscan(self):
 
@@ -109,7 +116,7 @@ class PipeScanFunction():
         self.tutorial.execute_plan(plan,move_group)
         print( "Horizental Scaning")
         position = np.array([0.3, -0.3,0.3])
-        speed_factor = 0.005
+        speed_factor = 0.001
         plan, fraction = self.tutorial.plan_cartesian_path(move_group,position,speed_factor)
         self.tutorial.execute_plan(plan,move_group)
         print( "Done")
@@ -153,7 +160,11 @@ class PipeScanFunction():
         print( "Done")
 
     def go_target(self):
-
+        move_group = "L_xarm6"
+        
+        self.target_center[0] = 0.3;
+        self.target_center[0] = 0.0;
+        self.target_center[0] = 0.5;
         print( "Tcp Go to Cylinder Center Position")
         self.pos_goal[0] = self.target_center[0] - 0.2
         self.pos_goal[1] = self.target_center[1]
@@ -161,21 +172,23 @@ class PipeScanFunction():
         self.pos_goal[3] = 0
         self.pos_goal[4] = 0
         self.pos_goal[5] = 0
-        move_group = "L_xarm6"
+       
 
         print(self.pos_goal)
         self.tutorial.go_to_pose_goal(move_group, self.pos_goal,0.5)
 
-        print( "Pad Go to Cylinder Center Position")
-        self.pos_goal[0] = self.target_center[0] + 0.2
-        self.pos_goal[1] = self.target_center[1]
-        self.pos_goal[2] = self.target_center[2]
-        self.pos_goal[3] = 0
-        self.pos_goal[4] = 0
-        self.pos_goal[5] = 0
-        move_group = "R_xarm6"
-        print(self.pos_goal)
-        self.tutorial.go_to_pose_goal(move_group, self.pos_goal,0.5)
+        if self.dual :
+            move_group = "R_xarm6"
+            print( "Pad Go to Cylinder Center Position")
+            self.pos_goal[0] = self.target_center[0] + 0.2
+            self.pos_goal[1] = self.target_center[1]
+            self.pos_goal[2] = self.target_center[2]
+            self.pos_goal[3] = 0
+            self.pos_goal[4] = 0
+            self.pos_goal[5] = 0
+            
+            print(self.pos_goal)
+            self.tutorial.go_to_pose_goal(move_group, self.pos_goal,0.5)
 
 
     def savePCD(self):
