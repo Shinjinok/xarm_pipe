@@ -145,17 +145,21 @@ class MyViz( QWidget ):
         layout.addLayout( h_layout )
 
         h_layout2 = QHBoxLayout()
+        
 
         pitch_label = QLabel("Pitch")
         h_layout2.addWidget(pitch_label)
+        
 
         self.pitch_text_box = QTextEdit("0.0")
+        self.pitch_text_box.setMaximumHeight(pitch_label.sizeHint().height()*2)
         h_layout2.addWidget(self.pitch_text_box)
         
         L_dist_label = QLabel("L_dist(m)")
         h_layout2.addWidget(L_dist_label)
 
         self.L_dist_text_box = QTextEdit("0.2")
+        self.L_dist_text_box.setMaximumHeight(L_dist_label.sizeHint().height()*2)
         h_layout2.addWidget(self.L_dist_text_box)
 
         
@@ -164,6 +168,8 @@ class MyViz( QWidget ):
         h_layout2.addWidget(R_dist_label)
 
         self.R_dist_text_box = QTextEdit("0.2")
+
+        self.R_dist_text_box.setMaximumHeight(R_dist_label.sizeHint().height()*2)
         h_layout2.addWidget(self.R_dist_text_box)
 
         go_rotation_button = QPushButton( "Go Rotation" )
