@@ -161,10 +161,6 @@ class PipeScanFunction():
 
     def go_target(self):
         move_group = "L_xarm6"
-        
-        self.target_center[0] = 0.3;
-        self.target_center[0] = 0.0;
-        self.target_center[0] = 0.5;
         print( "Tcp Go to Cylinder Center Position")
         self.pos_goal[0] = self.target_center[0] - 0.2
         self.pos_goal[1] = self.target_center[1]
