@@ -220,10 +220,10 @@ class MyViz( QWidget ):
         self.psf.command_thread("go_target")
         #self.text_box.setText("go_target")      
     def onGoRotationClick( self ):
-        roll = float(self.roll_text_box.toPlainText())/180.*3.14159
+       # roll = float(self.roll_text_box.toPlainText())/180.*3.14159
         pitch = float(self.pitch_text_box.toPlainText())/180.*3.14159
-        yaw = float(self.yaw_text_box.toPlainText())/180.*3.14159
-        new_value = np.array([roll,pitch,yaw])
+       # yaw = float(self.yaw_text_box.toPlainText())/180.*3.14159
+       # new_value = np.array([roll,pitch,yaw])
         print("set rotation :",pitch)
         self.psf.change_angle_thread(pitch)
 
