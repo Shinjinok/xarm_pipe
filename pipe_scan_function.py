@@ -137,8 +137,10 @@ class PipeScanFunction():
             self.target_center[1] = get[1]
             self.target_center[2] = get[2]
             self.target_radius = self.radius[0]
+
+            P=self.fc.get_clylinder_pos(self.center[0],self.normal[0])
             
-            self.tutorial.add_scene_pipe(orientation=self.normal[0],position=self.center[0],radius=self.radius[0],height= 0.5)
+            self.tutorial.add_scene_pipe(pose=P,radius=self.radius[0]*2,height= 0.5)
 
 
         for c in range(len(self.center)):
@@ -241,7 +243,7 @@ class PipeScanFunction():
                 self.target_center[2] = get[2]
                 self.target_radius = self.radius[c]*2
                 
-                self.tutorial.add_scene_pipe(orientation=self.normal[c],position=self.center[c],radius=self.radius[c],height= 0.5)
+                self.tutorial.add_scene_pipe(pose = P,radius=self.radius[c]*2,height= 0.5)
                 
             # pose, color, height, radius, lifetime  
         

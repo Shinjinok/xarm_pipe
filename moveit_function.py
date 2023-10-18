@@ -531,7 +531,7 @@ class MoveGroupPythonInterfaceTutorial(object):
         return self.wait_for_state_update(
             box_is_attached=False, box_is_known=False, timeout=timeout
         )
-    def add_scene_pipe(self,orientation,position,radius,height):
+    def add_scene_pipe(self,pose,radius,height):
         
         s = shape_msgs.msg.SolidPrimitive()
         s.dimensions = [height, radius/2.0]
@@ -539,16 +539,17 @@ class MoveGroupPythonInterfaceTutorial(object):
 
         ps = geometry_msgs.msg.PoseStamped()
         ps.header.frame_id = "world"
-        ps.pose.orientation.x = orientation[0]
-        ps.pose.orientation.y = orientation[1]
-        ps.pose.orientation.z = orientation[2]
-        ps.pose.orientation.w = orientation[3]
-        ps.pose.position.x = position[0]
-        ps.pose.position.y = position[1]
-        ps.pose.position.z = position[2]
+        ps.pose.orientation = pose.orientation
+        #ps.pose.orientation.y = orientation[1]
+        #ps.pose.orientation.z = orientation[2]
+        #ps.pose.orientation.w = orientation[3]
+        ps.pose.position = pose.position
+        #ps.pose.position.y = position[1]
+        #ps.pose.position.z = position[2]
 
         self.pssp.addSolidPrimitive( name="pipe", solid=s,
               pose= ps.pose,use_service=True, frame_id=ps.header.frame_id)
+        print("add pipe collision area")
 
 def main():
     try:
