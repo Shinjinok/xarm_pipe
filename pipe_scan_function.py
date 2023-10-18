@@ -69,9 +69,7 @@ class PipeScanFunction():
 
     def change_deg(self, rpy, ldist, rdist):
         move_group = "L_xarm6"
-        joint = np.array([0,-104/180*3.14,-33/180*3.14,0,47/180*3.14,0])
-        speed_factor = 0.5
-        self.tutorial.go_to_joint_state(move_group,joint,speed_factor)
+   
         print( "Tcp Go to Cylinder Center Position")
         print("R ", self.target_radius," pitch ",rpy," ldist ", ldist ,"\n")
 
@@ -100,10 +98,7 @@ class PipeScanFunction():
             
     def home(self):
         print("Left arm move home")
-        move_group = "L_xarm6"
-        joint = np.array([0,-104/180*3.14,-33/180*3.14,0,47/180*3.14,0])
-        speed_factor = 0.5
-        self.tutorial.go_to_joint_state(move_group,joint,speed_factor)
+        
         move_group = "L_xarm6"
         joint = np.array([0,0,0,0,-3.14/2,0])
         speed_factor = 0.5
@@ -142,11 +137,17 @@ class PipeScanFunction():
             self.target_center[1] = get[1]
             self.target_center[2] = get[2]
             self.target_radius = self.radius[0]
+            
+            self.tutorial.add_scene_pipe(orientation=self.normal[0],position=self.center[0],radius=self.radius[0],height= 0.5)
+
+
         for c in range(len(self.center)):
             print("Cylinder Center pos: ", self.center[c] ," radius", self.radius[c])
             P=self.fc.get_clylinder_pos(self.center[c],self.normal[c])
 
             self.markers.publishCylinder(pose = P, color = color ,height= 0.2, radius = self.radius[c]*2, lifetime=0) 
+
+            
             # pose, color, height, radius, lifetime  
         print("Marker published") 
 
@@ -177,10 +178,7 @@ class PipeScanFunction():
 
     def go_target(self,ldist,rdist):
         move_group = "L_xarm6"
-        joint = np.array([0,-104/180*3.14,-33/180*3.14,0,47/180*3.14,0])
-        speed_factor = 0.5
-        self.tutorial.go_to_joint_state(move_group,joint,speed_factor)
-        
+                
         print( "Tcp Go to Cylinder Center Position")
         self.pos_goal[0] = self.target_center[0] - (self.target_radius + ldist +self.Lmargin)
         self.pos_goal[1] = self.target_center[1]
@@ -242,6 +240,8 @@ class PipeScanFunction():
                 self.target_center[1] = get[1]
                 self.target_center[2] = get[2]
                 self.target_radius = self.radius[c]*2
+                
+                self.tutorial.add_scene_pipe(orientation=self.normal[c],position=self.center[c],radius=self.radius[c],height= 0.5)
                 
             # pose, color, height, radius, lifetime  
         

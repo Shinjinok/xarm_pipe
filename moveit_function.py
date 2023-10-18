@@ -51,8 +51,10 @@ import rospy
 import moveit_commander
 import moveit_msgs.msg
 import geometry_msgs.msg
+import shape_msgs.msg
 import numpy as np
 import os
+import planning_scene_interface
 
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 try:
@@ -186,6 +188,8 @@ class MoveGroupPythonInterfaceTutorial(object):
         self.planning_frame = planning_frame
         self.eef_link = eef_link
         self.group_names = group_names
+
+        self.pssp =planning_scene_interface.PlanningSceneInterface(frame="world")
 
     def euler_to_quaternion(self,roll,pitch,yaw):
 
@@ -527,6 +531,24 @@ class MoveGroupPythonInterfaceTutorial(object):
         return self.wait_for_state_update(
             box_is_attached=False, box_is_known=False, timeout=timeout
         )
+    def add_scene_pipe(self,orientation,position,radius,height):
+        
+        s = shape_msgs.msg.SolidPrimitive()
+        s.dimensions = [height, radius/2.0]
+        s.type = s.CYLINDER
+
+        ps = geometry_msgs.msg.PoseStamped()
+        ps.header.frame_id = "world"
+        ps.pose.orientation.x = orientation[0]
+        ps.pose.orientation.y = orientation[1]
+        ps.pose.orientation.z = orientation[2]
+        ps.pose.orientation.w = orientation[3]
+        ps.pose.position.x = position[0]
+        ps.pose.position.y = position[1]
+        ps.pose.position.z = position[2]
+
+        self.pssp.addSolidPrimitive( name="pipe", solid=s,
+              pose= ps.pose,use_service=True, frame_id=ps.header.frame_id)
 
 def main():
     try:
