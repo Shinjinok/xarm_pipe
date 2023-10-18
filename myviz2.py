@@ -181,7 +181,7 @@ class MyViz( QWidget ):
         
         self.setLayout( layout )
         
-        dual = False
+        dual = True
         self.psf = psf.PipeScanFunction(dual)
         
     
@@ -217,15 +217,19 @@ class MyViz( QWidget ):
         #self.text_box.setText("savePCD")  
 
     def onGoButtonClick( self ):
-        self.psf.command_thread("go_target")
+        ldist = float(self.L_dist_text_box.toPlainText())
+        rdist = float(self.R_dist_text_box.toPlainText())
+        self.psf.go_target_thread(ldist,rdist)
         #self.text_box.setText("go_target")      
     def onGoRotationClick( self ):
        # roll = float(self.roll_text_box.toPlainText())/180.*3.14159
         pitch = float(self.pitch_text_box.toPlainText())/180.*3.14159
        # yaw = float(self.yaw_text_box.toPlainText())/180.*3.14159
        # new_value = np.array([roll,pitch,yaw])
+        ldist = float(self.L_dist_text_box.toPlainText())
+        rdist = float(self.R_dist_text_box.toPlainText())
         print("set rotation :",pitch)
-        self.psf.change_angle_thread(pitch)
+        self.psf.change_angle_thread(pitch,ldist,rdist)
 
          
     ## switchToView() works by looping over the views saved in the
