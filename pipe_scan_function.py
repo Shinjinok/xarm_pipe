@@ -112,6 +112,7 @@ class PipeScanFunction():
     def hscan(self):
 
         self.markers.deleteAllMarkers()
+        self.tutorial.remove_scene_pipe()
 
         print( " Go to start position")
         move_group = "L_xarm6"
@@ -140,7 +141,7 @@ class PipeScanFunction():
 
             P=self.fc.get_clylinder_pos(self.center[0],self.normal[0])
             
-            self.tutorial.add_scene_pipe(pose=P,radius=self.radius[0]*2,height= 0.5)
+            self.tutorial.add_scene_pipe(pose=P,radius=self.radius[0],height= 0.5)
 
 
         for c in range(len(self.center)):
@@ -243,7 +244,7 @@ class PipeScanFunction():
                 self.target_center[2] = get[2]
                 self.target_radius = self.radius[c]*2
                 
-                self.tutorial.add_scene_pipe(pose = P,radius=self.radius[c]*2,height= 0.5)
+                self.tutorial.add_scene_pipe(pose = P,radius=self.radius[c],height= 0.5)
                 
             # pose, color, height, radius, lifetime  
         

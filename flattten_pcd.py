@@ -7,9 +7,9 @@ from tf import transformations
 from geometry_msgs.msg import Pose, Point, Quaternion, Vector3, Polygon
 import matplotlib.pyplot as plt
 
-MaxX = 1.5
+MaxX = 4
 MinX = 0
-MaxZ = 1.5
+MaxZ = 3
 MinZ = 0
 MaxR = 1
 
@@ -60,6 +60,7 @@ def get_cylinder(pcd,thresh=0.1,maxIteration=1000):
 #    o3d.visualization.draw_geometries([outlier_cloud])
     with o3d.utility.VerbosityContextManager(o3d.utility.VerbosityLevel.Debug) as cm:
         labels = np.array(outlier_cloud.cluster_dbscan(eps=0.1, min_points=10, print_progress=True))
+
     max_label = labels.max()
     print(f"point cloud has {max_label + 1} clusters")
     colors = plt.get_cmap("tab20")(labels / (max_label if max_label > 0 else 1))

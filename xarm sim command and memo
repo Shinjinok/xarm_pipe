@@ -12,3 +12,6 @@ L arm dual
 
 source file github
 	git clone https://github.com/Shinjinok/xarm6_ros.git
+
+roslaunch dual_xarm6_moveit_config realMove_exec.launch robot_ip_1:=192.168.0.100 robot_ip_2:=192.168.0.200
+

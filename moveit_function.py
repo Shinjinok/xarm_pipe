@@ -534,7 +534,7 @@ class MoveGroupPythonInterfaceTutorial(object):
     def add_scene_pipe(self,pose,radius,height):
         
         s = shape_msgs.msg.SolidPrimitive()
-        s.dimensions = [height, radius/2.0]
+        s.dimensions = [height, radius]
         s.type = s.CYLINDER
 
         ps = geometry_msgs.msg.PoseStamped()
@@ -550,6 +550,10 @@ class MoveGroupPythonInterfaceTutorial(object):
         self.pssp.addSolidPrimitive( name="pipe", solid=s,
               pose= ps.pose,use_service=True, frame_id=ps.header.frame_id)
         print("add pipe collision area")
+
+    def remove_scene_pipe(self):
+        self.pssp.removeCollisionObject("pipe",True)
+        print("remove scene pipe")
 
 def main():
     try:
